@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AdminNav } from "@/components/AdminNav";
 import type { BusinessSettings, PriceItem } from "@/lib/types";
 import { money } from "@/lib/format";
@@ -10,7 +10,6 @@ export default function PriceBookPage() {
   const [instructions, setInstructions] = useState("");
   const [items, setItems] = useState<PriceItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -18,6 +17,16 @@ export default function PriceBookPage() {
   const [lastSource, setLastSource] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const instructionsRef = useRef(instructions);
+  const rawRef = useRef(raw);
+
+  useEffect(() => {
+    instructionsRef.current = instructions;
+  }, [instructions]);
+
+  useEffect(() => {
+    rawRef.current = raw;
+  }, [raw]);
 
   async function load() {
     setLoading(true);
@@ -56,6 +65,24 @@ export default function PriceBookPage() {
     void load();
   }, []);
 
+  async function persist(partial: { instructions?: string; raw?: string }) {
+    try {
+      const response = await fetch("/api/price-book", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(partial),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error("Could not update price book.");
+      if (typeof partial.raw === "string") {
+        setItems(data.items);
+        setRaw(data.raw);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not update.");
+    }
+  }
+
   async function uploadFile(file: File) {
     setUploading(true);
     setMessage(null);
@@ -76,38 +103,14 @@ export default function PriceBookPage() {
       setRaw(data.raw);
       setLastSource(data.source || file.name);
       setWarnings(data.warnings ?? []);
-      setMessage(data.message);
+      setMessage(
+        `Price book updated from ${data.source || file.name} (${data.items.length} lines).`,
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed.");
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
-    }
-  }
-
-  async function save(event: FormEvent) {
-    event.preventDefault();
-    setSaving(true);
-    setMessage(null);
-    setError(null);
-    try {
-      const response = await fetch("/api/price-book", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          raw,
-          instructions,
-        }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error("Save failed.");
-      setItems(data.items);
-      setRaw(data.raw);
-      setMessage(`Saved instructions and ${data.items.length} price rows.`);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Save failed.");
-    } finally {
-      setSaving(false);
     }
   }
 
@@ -120,7 +123,8 @@ export default function PriceBookPage() {
             Price book
           </h1>
           <p className="mt-1 text-sm text-base-content/70 sm:text-base">
-            Upload a price list. The mapped rows below come from that file.
+            Upload a price list. Once it is analyzed, that becomes the price
+            book.
           </p>
         </div>
 
@@ -129,7 +133,7 @@ export default function PriceBookPage() {
             <span className="loading loading-spinner loading-lg text-primary" />
           </div>
         ) : (
-          <form onSubmit={save} className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-6 lg:grid-cols-2">
             <section className="space-y-4 rounded-2xl border border-base-300 bg-base-100 p-5">
               <label className="form-control w-full">
                 <span className="label-text mb-1">Owner instructions</span>
@@ -137,6 +141,11 @@ export default function PriceBookPage() {
                   className="textarea textarea-bordered min-h-28"
                   value={instructions}
                   onChange={(e) => setInstructions(e.target.value)}
+                  onBlur={() => {
+                    if (instructionsRef.current !== undefined) {
+                      void persist({ instructions: instructionsRef.current });
+                    }
+                  }}
                   placeholder="How to price jobs from this list."
                 />
               </label>
@@ -166,11 +175,12 @@ export default function PriceBookPage() {
                         </p>
                         <p className="mt-1 text-sm text-base-content/70">
                           Quinsta mapped {items.length} line
-                          {items.length === 1 ? "" : "s"} — see the list below.
+                          {items.length === 1 ? "" : "s"} — this is the active
+                          price book.
                         </p>
                       </div>
                       <span className="badge badge-success badge-outline">
-                        Ready
+                        Applied
                       </span>
                     </div>
                     <div className="mt-4 flex flex-wrap gap-2">
@@ -238,6 +248,9 @@ export default function PriceBookPage() {
                   className="textarea textarea-bordered mt-3 min-h-48 w-full font-mono text-xs"
                   value={raw}
                   onChange={(e) => setRaw(e.target.value)}
+                  onBlur={() => {
+                    void persist({ raw: rawRef.current });
+                  }}
                 />
               </details>
 
@@ -256,24 +269,13 @@ export default function PriceBookPage() {
                   <span>{error}</span>
                 </div>
               )}
-              <button
-                type="submit"
-                className="btn btn-primary w-full sm:w-auto"
-                disabled={saving || uploading}
-              >
-                {saving ? (
-                  <span className="loading loading-spinner loading-sm" />
-                ) : (
-                  "Save price book"
-                )}
-              </button>
             </section>
 
             <section className="rounded-2xl border border-base-300 bg-base-100 p-4 sm:p-5">
               <h2 className="font-display text-xl font-semibold">
                 What Quinsta understood ({items.length})
               </h2>
-              <div className="mt-4 space-y-3 md:hidden">
+              <div className="mt-4 max-h-[36rem] space-y-3 overflow-auto">
                 {items.map((item) => (
                   <div
                     key={item.sku}
@@ -296,35 +298,8 @@ export default function PriceBookPage() {
                   </div>
                 ))}
               </div>
-              <div className="mt-4 hidden max-h-[36rem] overflow-auto md:block">
-                <table className="table table-sm">
-                  <thead>
-                    <tr>
-                      <th>SKU</th>
-                      <th>Name</th>
-                      <th>Category</th>
-                      <th>Price</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {items.map((item) => (
-                      <tr key={item.sku}>
-                        <td className="font-mono text-xs">{item.sku}</td>
-                        <td>
-                          <div>{item.name}</div>
-                          <div className="text-xs text-base-content/55">
-                            / {item.unit}
-                          </div>
-                        </td>
-                        <td>{item.category}</td>
-                        <td>{money(item.price)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
             </section>
-          </form>
+          </div>
         )}
       </main>
     </div>
