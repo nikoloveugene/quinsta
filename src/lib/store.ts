@@ -7,8 +7,21 @@ import {
 } from "./seed";
 import type { StoreShape } from "./types";
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const STORE_PATH = path.join(DATA_DIR, "store.json");
+const globalForStore = globalThis as unknown as {
+  __quinstaStore?: StoreShape;
+};
+
+function dataDir(): string {
+  // Vercel serverless FS is read-only except /tmp
+  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    return path.join("/tmp", "quinsta-data");
+  }
+  return path.join(process.cwd(), "data");
+}
+
+function storePath(): string {
+  return path.join(dataDir(), "store.json");
+}
 
 function defaultStore(): StoreShape {
   return {
@@ -21,18 +34,30 @@ function defaultStore(): StoreShape {
 }
 
 async function ensureStore(): Promise<StoreShape> {
-  await fs.mkdir(DATA_DIR, { recursive: true });
+  if (globalForStore.__quinstaStore) {
+    return globalForStore.__quinstaStore;
+  }
+
   try {
-    const raw = await fs.readFile(STORE_PATH, "utf8");
+    await fs.mkdir(dataDir(), { recursive: true });
+    const raw = await fs.readFile(storePath(), "utf8");
     const parsed = JSON.parse(raw) as StoreShape;
-    return {
+    const store = {
       ...defaultStore(),
       ...parsed,
       settings: { ...DEFAULT_SETTINGS, ...parsed.settings },
     };
+    globalForStore.__quinstaStore = store;
+    return store;
   } catch {
     const store = defaultStore();
-    await fs.writeFile(STORE_PATH, JSON.stringify(store, null, 2), "utf8");
+    globalForStore.__quinstaStore = store;
+    try {
+      await fs.mkdir(dataDir(), { recursive: true });
+      await fs.writeFile(storePath(), JSON.stringify(store, null, 2), "utf8");
+    } catch {
+      // memory-only fallback
+    }
     return store;
   }
 }
@@ -42,8 +67,13 @@ export async function readStore(): Promise<StoreShape> {
 }
 
 export async function writeStore(store: StoreShape): Promise<void> {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.writeFile(STORE_PATH, JSON.stringify(store, null, 2), "utf8");
+  globalForStore.__quinstaStore = store;
+  try {
+    await fs.mkdir(dataDir(), { recursive: true });
+    await fs.writeFile(storePath(), JSON.stringify(store, null, 2), "utf8");
+  } catch {
+    // keep in-memory copy on read-only hosts
+  }
 }
 
 export async function updateStore(
