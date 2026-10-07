@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { AdminNav } from "@/components/AdminNav";
 import type { BusinessSettings, PriceItem } from "@/lib/types";
 import { money } from "@/lib/format";
@@ -13,8 +13,13 @@ export default function PriceBookPage() {
   const [items, setItems] = useState<PriceItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [warnings, setWarnings] = useState<string[]>([]);
+  const [lastSource, setLastSource] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function load() {
     setLoading(true);
@@ -40,6 +45,35 @@ export default function PriceBookPage() {
   useEffect(() => {
     void load();
   }, []);
+
+  async function uploadFile(file: File) {
+    setUploading(true);
+    setMessage(null);
+    setError(null);
+    setWarnings([]);
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      const response = await fetch("/api/price-book/upload", {
+        method: "POST",
+        body,
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Upload failed.");
+      }
+      setItems(data.items);
+      setRaw(data.raw);
+      setLastSource(data.source);
+      setWarnings(data.warnings ?? []);
+      setMessage(data.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed.");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
 
   async function save(event: FormEvent) {
     event.preventDefault();
@@ -73,6 +107,7 @@ export default function PriceBookPage() {
     setSaving(true);
     setMessage(null);
     setError(null);
+    setWarnings([]);
     try {
       const response = await fetch("/api/price-book", {
         method: "PUT",
@@ -85,6 +120,7 @@ export default function PriceBookPage() {
       setInstructions(data.settings.instructions);
       setBusinessName(data.settings.businessName);
       setOwnerEmail(data.settings.ownerEmail);
+      setLastSource("sample landscaping price book");
       setMessage("Restored sample landscaping price book.");
     } catch {
       setError("Could not reset sample.");
@@ -101,14 +137,14 @@ export default function PriceBookPage() {
           <div>
             <h1 className="font-display text-3xl font-semibold">Price book</h1>
             <p className="mt-1 text-base-content/70">
-              Paste CSV or simple lines. Quotes only use these prices.
+              Upload your price list. Quotes only use these prices.
             </p>
           </div>
           <button
             type="button"
             className="btn btn-outline btn-sm"
             onClick={() => void resetSample()}
-            disabled={saving}
+            disabled={saving || uploading}
           >
             Restore sample
           </button>
@@ -146,19 +182,83 @@ export default function PriceBookPage() {
                   onChange={(e) => setInstructions(e.target.value)}
                 />
               </label>
-              <label className="form-control w-full">
-                <span className="label-text mb-1">
-                  Price list (CSV or name — $price)
-                </span>
+
+              <div>
+                <p className="label-text mb-2">Price list file</p>
+                <div
+                  className={`rounded-2xl border-2 border-dashed px-4 py-10 text-center transition ${
+                    dragOver
+                      ? "border-primary bg-primary/5"
+                      : "border-base-300 bg-base-200/40"
+                  }`}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setDragOver(true);
+                  }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setDragOver(false);
+                    const file = e.dataTransfer.files?.[0];
+                    if (file) void uploadFile(file);
+                  }}
+                >
+                  <p className="font-display text-lg font-semibold">
+                    Drop a file here
+                  </p>
+                  <p className="mx-auto mt-2 max-w-md text-sm text-base-content/65">
+                    Excel, Google Sheets export (CSV/XLSX), CSV, PDF, or a phone
+                    photo of a handwritten price list.
+                  </p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden"
+                    accept=".csv,.xlsx,.xls,.ods,.pdf,.txt,image/*,.jpg,.jpeg,.png,.webp,.heic"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) void uploadFile(file);
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-primary mt-5"
+                    disabled={uploading}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    {uploading ? (
+                      <span className="loading loading-spinner loading-sm" />
+                    ) : (
+                      "Choose file"
+                    )}
+                  </button>
+                  {lastSource && (
+                    <p className="mt-3 text-xs text-base-content/55">
+                      Last upload: {lastSource}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <details className="rounded-xl border border-base-300 bg-base-100 p-3">
+                <summary className="cursor-pointer text-sm font-medium">
+                  Edit extracted text (optional)
+                </summary>
                 <textarea
-                  className="textarea textarea-bordered min-h-64 font-mono text-xs"
+                  className="textarea textarea-bordered mt-3 min-h-48 w-full font-mono text-xs"
                   value={raw}
                   onChange={(e) => setRaw(e.target.value)}
                 />
-              </label>
+              </details>
+
               {message && (
                 <div className="alert alert-success text-sm">
                   <span>{message}</span>
+                </div>
+              )}
+              {warnings.length > 0 && (
+                <div className="alert alert-warning text-sm">
+                  <span>{warnings.join(" ")}</span>
                 </div>
               )}
               {error && (
@@ -166,11 +266,15 @@ export default function PriceBookPage() {
                   <span>{error}</span>
                 </div>
               )}
-              <button type="submit" className="btn btn-primary" disabled={saving}>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={saving || uploading}
+              >
                 {saving ? (
                   <span className="loading loading-spinner loading-sm" />
                 ) : (
-                  "Save price book"
+                  "Save business settings"
                 )}
               </button>
             </section>
