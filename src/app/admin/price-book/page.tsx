@@ -133,8 +133,8 @@ export default function PriceBookPage() {
             <span className="loading loading-spinner loading-lg text-primary" />
           </div>
         ) : (
-          <div className="grid gap-6 lg:grid-cols-2">
-            <section className="space-y-4 rounded-2xl border border-base-300 bg-base-100 p-5">
+          <div className="grid gap-10 lg:grid-cols-2 lg:gap-12 lg:items-start">
+            <section className="space-y-5">
               <label className="form-control w-full">
                 <span className="label-text mb-1">Owner instructions</span>
                 <textarea
@@ -164,7 +164,7 @@ export default function PriceBookPage() {
                 />
 
                 {items.length > 0 && lastSource ? (
-                  <div className="rounded-2xl border border-primary/30 bg-primary/5 px-4 py-5">
+                  <div className="border-t border-primary/25 pt-4">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-wide text-primary">
@@ -179,9 +179,7 @@ export default function PriceBookPage() {
                           price book.
                         </p>
                       </div>
-                      <span className="badge badge-success badge-outline">
-                        Applied
-                      </span>
+                      <span className="badge badge-primary">Applied</span>
                     </div>
                     <div className="mt-4 flex flex-wrap gap-2">
                       <button
@@ -203,7 +201,7 @@ export default function PriceBookPage() {
                     className={`rounded-2xl border-2 border-dashed px-4 py-10 text-center transition ${
                       dragOver
                         ? "border-primary bg-primary/5"
-                        : "border-base-300 bg-base-200/40"
+                        : "border-base-300"
                     }`}
                     onDragOver={(e) => {
                       e.preventDefault();
@@ -240,7 +238,7 @@ export default function PriceBookPage() {
                 )}
               </div>
 
-              <details className="rounded-xl border border-base-300 bg-base-100 p-3">
+              <details className="border-t border-base-300 pt-3">
                 <summary className="cursor-pointer text-sm font-medium">
                   Edit extracted text (optional)
                 </summary>
@@ -271,15 +269,15 @@ export default function PriceBookPage() {
               )}
             </section>
 
-            <section className="rounded-2xl border border-base-300 bg-base-100 p-4 sm:p-5">
+            <section>
               <h2 className="font-display text-xl font-semibold">
                 What Quinsta understood ({items.length})
               </h2>
-              <div className="mt-4 max-h-[36rem] space-y-3 overflow-auto">
+              <div className="mt-4 space-y-3">
                 {items.map((item) => (
                   <div
                     key={item.sku}
-                    className="rounded-xl border border-base-300 bg-base-200/40 p-3"
+                    className="rounded-xl border border-base-300 p-3"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
