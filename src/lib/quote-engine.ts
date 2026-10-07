@@ -75,8 +75,24 @@ export function generateMockQuote(
   const text = input.jobDescription.toLowerCase();
   const tokens = new Set(tokenize(input.jobDescription));
 
+  const wantsMow =
+    /\b(mow|mowing|cut the grass|weekly|biweekly|lawn care)\b/.test(text);
+  const wantsFertilizer = /\b(fertiliz|feed the lawn)\b/.test(text);
+
   const ranked = priceBook
-    .map((item) => ({ item, score: scoreItem(item, tokens, text) }))
+    .map((item) => {
+      let score = scoreItem(item, tokens, text);
+      // Do not treat "lawn" alone as a mow package signal.
+      if (
+        item.category === "Lawn care" &&
+        !wantsMow &&
+        (tokens.has("lawn") || text.includes("lawn"))
+      ) {
+        score = Math.max(0, score - 3);
+      }
+      if (item.sku === "AD-FERT" && wantsFertilizer) score += 5;
+      return { item, score };
+    })
     .filter((row) => row.score > 0)
     .sort((a, b) => b.score - a.score);
 
@@ -96,6 +112,7 @@ export function generateMockQuote(
       (i) => i.category !== "Lawn care" || i.sku === bestLawn?.sku,
     );
   }
+
 
   const lineItems: QuoteLineItem[] = selected.map((item) => {
     const quantity = inferQuantity(item, text);
