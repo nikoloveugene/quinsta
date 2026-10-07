@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { AdminNav } from "@/components/AdminNav";
-import { BusinessSettingsForm } from "@/components/BusinessSettingsForm";
 import { money } from "@/lib/format";
 import { readStore } from "@/lib/store";
 
@@ -37,10 +36,6 @@ export default async function AdminHomePage() {
         </div>
 
         <div className="grid gap-4 lg:grid-cols-2">
-          <BusinessSettingsForm
-            initialBusinessName={store.settings.businessName}
-            initialOwnerEmail={store.settings.ownerEmail}
-          />
           <section className="rounded-2xl border border-base-300 bg-base-100 p-5">
             <h2 className="font-display text-xl font-semibold">Status</h2>
             <dl className="mt-4 space-y-2 text-sm">
