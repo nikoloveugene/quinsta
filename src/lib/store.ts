@@ -23,11 +23,14 @@ function storePath(): string {
   return path.join(dataDir(), "store.json");
 }
 
+export const SAMPLE_PRICE_BOOK_SOURCE = "sample-landscaping-price-book.csv";
+
 function defaultStore(): StoreShape {
   return {
     settings: DEFAULT_SETTINGS,
     priceBook: SAMPLE_PRICE_BOOK,
     priceBookRaw: priceBookToCsv(SAMPLE_PRICE_BOOK),
+    priceBookSource: SAMPLE_PRICE_BOOK_SOURCE,
     quotes: [],
     emails: [],
   };
@@ -42,10 +45,16 @@ async function ensureStore(): Promise<StoreShape> {
     await fs.mkdir(dataDir(), { recursive: true });
     const raw = await fs.readFile(storePath(), "utf8");
     const parsed = JSON.parse(raw) as StoreShape;
-    const store = {
-      ...defaultStore(),
+    const defaults = defaultStore();
+    const store: StoreShape = {
+      ...defaults,
       ...parsed,
       settings: { ...DEFAULT_SETTINGS, ...parsed.settings },
+      priceBookSource:
+        parsed.priceBookSource ||
+        (parsed.priceBook?.length
+          ? SAMPLE_PRICE_BOOK_SOURCE
+          : defaults.priceBookSource),
     };
     globalForStore.__quinstaStore = store;
     return store;

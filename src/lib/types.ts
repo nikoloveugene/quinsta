@@ -61,6 +61,7 @@ export type StoreShape = {
   settings: BusinessSettings;
   priceBook: PriceItem[];
   priceBookRaw: string;
+  priceBookSource: string;
   quotes: Quote[];
   emails: EmailRecord[];
 };

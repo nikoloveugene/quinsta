@@ -34,11 +34,13 @@ export default function PriceBookPage() {
       const data = (await response.json()) as {
         raw: string;
         items: PriceItem[];
+        source?: string;
         settings: BusinessSettings;
       };
       if (!response.ok) throw new Error("Could not load price book.");
       setRaw(data.raw);
       setItems(data.items);
+      setLastSource(data.source || null);
       setInstructions(data.settings.instructions);
       setBusinessName(data.settings.businessName);
       setOwnerEmail(data.settings.ownerEmail);
@@ -76,7 +78,7 @@ export default function PriceBookPage() {
       }
       setItems(data.items);
       setRaw(data.raw);
-      setLastSource(data.source);
+      setLastSource(data.source || file.name);
       setWarnings(data.warnings ?? []);
       setMessage(data.message);
     } catch (err) {
@@ -132,7 +134,7 @@ export default function PriceBookPage() {
       setInstructions(data.settings.instructions);
       setBusinessName(data.settings.businessName);
       setOwnerEmail(data.settings.ownerEmail);
-      setLastSource("sample landscaping price book");
+      setLastSource(data.source || "sample-landscaping-price-book.csv");
       setMessage("Restored sample landscaping price book.");
     } catch {
       setError("Could not reset sample.");
@@ -197,59 +199,103 @@ export default function PriceBookPage() {
 
               <div>
                 <p className="label-text mb-2">Price list file</p>
-                <div
-                  className={`rounded-2xl border-2 border-dashed px-4 py-10 text-center transition ${
-                    dragOver
-                      ? "border-primary bg-primary/5"
-                      : "border-base-300 bg-base-200/40"
-                  }`}
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    setDragOver(true);
-                  }}
-                  onDragLeave={() => setDragOver(false)}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    setDragOver(false);
-                    const file = e.dataTransfer.files?.[0];
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  className="hidden"
+                  accept=".csv,.xlsx,.xls,.ods,.pdf,.txt,image/*,.jpg,.jpeg,.png,.webp,.heic"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
                     if (file) void uploadFile(file);
                   }}
-                >
-                  <p className="font-display text-lg font-semibold">
-                    Drop a file here
-                  </p>
-                  <p className="mx-auto mt-2 max-w-md text-sm text-base-content/65">
-                    Excel, Google Sheets export (CSV/XLSX), CSV, PDF, or a phone
-                    photo of a handwritten price list.
-                  </p>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    className="hidden"
-                    accept=".csv,.xlsx,.xls,.ods,.pdf,.txt,image/*,.jpg,.jpeg,.png,.webp,.heic"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
+                />
+
+                {items.length > 0 && lastSource ? (
+                  <div className="rounded-2xl border border-primary/30 bg-primary/5 px-4 py-5">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+                          File selected · analyzed
+                        </p>
+                        <p className="mt-1 font-display text-lg font-semibold">
+                          {lastSource}
+                        </p>
+                        <p className="mt-1 text-sm text-base-content/70">
+                          Quinsta mapped {items.length} line
+                          {items.length === 1 ? "" : "s"} — see the panel on the
+                          right.
+                        </p>
+                      </div>
+                      <span className="badge badge-success badge-outline">
+                        Ready
+                      </span>
+                    </div>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        disabled={uploading}
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        {uploading ? (
+                          <span className="loading loading-spinner loading-sm" />
+                        ) : (
+                          "Replace file"
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        disabled={uploading}
+                        onClick={() => {
+                          setDragOver(false);
+                          fileInputRef.current?.click();
+                        }}
+                      >
+                        Upload another
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    className={`rounded-2xl border-2 border-dashed px-4 py-10 text-center transition ${
+                      dragOver
+                        ? "border-primary bg-primary/5"
+                        : "border-base-300 bg-base-200/40"
+                    }`}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setDragOver(true);
+                    }}
+                    onDragLeave={() => setDragOver(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setDragOver(false);
+                      const file = e.dataTransfer.files?.[0];
                       if (file) void uploadFile(file);
                     }}
-                  />
-                  <button
-                    type="button"
-                    className="btn btn-primary mt-5"
-                    disabled={uploading}
-                    onClick={() => fileInputRef.current?.click()}
                   >
-                    {uploading ? (
-                      <span className="loading loading-spinner loading-sm" />
-                    ) : (
-                      "Choose file"
-                    )}
-                  </button>
-                  {lastSource && (
-                    <p className="mt-3 text-xs text-base-content/55">
-                      Last upload: {lastSource}
+                    <p className="font-display text-lg font-semibold">
+                      Drop a file here
                     </p>
-                  )}
-                </div>
+                    <p className="mx-auto mt-2 max-w-md text-sm text-base-content/65">
+                      Excel, Google Sheets export (CSV/XLSX), CSV, PDF, or a
+                      phone photo of a handwritten price list.
+                    </p>
+                    <button
+                      type="button"
+                      className="btn btn-primary mt-5"
+                      disabled={uploading}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      {uploading ? (
+                        <span className="loading loading-spinner loading-sm" />
+                      ) : (
+                        "Choose file"
+                      )}
+                    </button>
+                  </div>
+                )}
               </div>
 
               <details className="rounded-xl border border-base-300 bg-base-100 p-3">

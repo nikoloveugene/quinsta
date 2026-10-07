@@ -5,13 +5,14 @@ import {
   parsePriceBookText,
   priceBookToCsv,
 } from "@/lib/seed";
-import { readStore, updateStore } from "@/lib/store";
+import { SAMPLE_PRICE_BOOK_SOURCE, readStore, updateStore } from "@/lib/store";
 
 export async function GET() {
   const store = await readStore();
   return NextResponse.json({
     items: store.priceBook,
     raw: store.priceBookRaw,
+    source: store.priceBookSource,
     settings: store.settings,
   });
 }
@@ -31,6 +32,7 @@ export async function PUT(request: Request) {
         ...current,
         priceBook: SAMPLE_PRICE_BOOK,
         priceBookRaw: priceBookToCsv(SAMPLE_PRICE_BOOK),
+        priceBookSource: SAMPLE_PRICE_BOOK_SOURCE,
         settings: {
           ...current.settings,
           instructions: DEFAULT_SETTINGS.instructions,
@@ -51,6 +53,10 @@ export async function PUT(request: Request) {
       ...current,
       priceBook,
       priceBookRaw,
+      priceBookSource:
+        typeof body.raw === "string"
+          ? current.priceBookSource || "edited-price-book.csv"
+          : current.priceBookSource,
       settings: {
         ...current.settings,
         instructions:
@@ -72,6 +78,7 @@ export async function PUT(request: Request) {
   return NextResponse.json({
     items: store.priceBook,
     raw: store.priceBookRaw,
+    source: store.priceBookSource,
     settings: store.settings,
   });
 }

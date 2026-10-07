@@ -50,13 +50,14 @@ export async function POST(request: Request) {
       ...current,
       priceBook: result.items,
       priceBookRaw: result.raw,
+      priceBookSource: result.source,
     }));
 
     return NextResponse.json({
       items: store.priceBook,
       raw: store.priceBookRaw,
+      source: store.priceBookSource,
       settings: store.settings,
-      source: result.source,
       method: result.method,
       warnings: result.warnings,
       message: `Loaded ${result.items.length} items from ${result.source}.`,
