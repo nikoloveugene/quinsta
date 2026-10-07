@@ -31,9 +31,21 @@
     linear-gradient(180deg, #0f1411 0%, #121814 45%, #151c17 100%);
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   min-height: 100vh;
   background: var(--page-glow);
+  overflow-x: hidden;
+}
+
+/* Comfortable tap targets on phones */
+@media (max-width: 767px) {
+  .btn {
+    min-height: 2.75rem;
+  }
 }
 
 .lawn-grid {

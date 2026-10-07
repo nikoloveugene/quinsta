@@ -11,18 +11,18 @@ export default function HomePage() {
         <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-primary">
           Quinsta
         </p>
-        <h1 className="max-w-3xl font-display text-5xl font-semibold leading-tight text-base-content sm:text-6xl">
+        <h1 className="max-w-3xl font-display text-4xl font-semibold leading-tight text-base-content sm:text-5xl md:text-6xl">
           Instant landscaping estimates for your website
         </h1>
-        <p className="mt-5 max-w-2xl text-lg text-base-content/75">
+        <p className="mt-5 max-w-2xl text-base text-base-content/75 sm:text-lg">
           Customers describe the job. Quinsta drafts a price-book estimate.
           You approve before they get the email.
         </p>
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="/admin" className="btn btn-primary">
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <Link href="/admin" className="btn btn-primary w-full sm:w-auto">
             Open admin
           </Link>
-          <Link href="/demo" className="btn btn-outline">
+          <Link href="/demo" className="btn btn-outline w-full sm:w-auto">
             Try customer widget
           </Link>
         </div>

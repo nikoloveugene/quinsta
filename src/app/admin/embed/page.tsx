@@ -15,17 +15,19 @@ export default async function EmbedPage() {
   return (
     <div className="min-h-screen">
       <AdminNav current="/admin/embed" />
-      <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
+      <main className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:py-8">
         <div>
-          <h1 className="font-display text-3xl font-semibold">Embed</h1>
-          <p className="mt-1 text-base-content/70">
+          <h1 className="font-display text-2xl font-semibold sm:text-3xl">
+            Embed
+          </h1>
+          <p className="mt-1 text-sm text-base-content/70 sm:text-base">
             Paste this on your site, or use the demo page for local testing.
           </p>
         </div>
 
         <section className="rounded-2xl border border-base-300 bg-base-100 p-5">
           <h2 className="font-display text-xl font-semibold">Site key</h2>
-          <code className="mt-3 block rounded-lg bg-base-200 px-3 py-2 font-mono text-sm">
+          <code className="mt-3 block break-all rounded-lg bg-base-200 px-3 py-2 font-mono text-xs sm:text-sm">
             {store.settings.siteKey}
           </code>
         </section>
@@ -42,7 +44,7 @@ export default async function EmbedPage() {
             <code className="text-xs">/widget.js</code> serves a lightweight
             bootstrap that opens the demo flow.
           </p>
-          <pre className="mt-4 overflow-x-auto rounded-xl bg-neutral p-4 text-sm text-neutral-content">
+          <pre className="mt-4 overflow-x-auto rounded-xl bg-neutral p-3 text-xs text-neutral-content sm:p-4 sm:text-sm">
             <code>{snippet}</code>
           </pre>
         </section>

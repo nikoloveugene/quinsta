@@ -18,17 +18,17 @@ export default async function AdminHomePage() {
   return (
     <div className="min-h-screen">
       <AdminNav current="/admin" />
-      <main className="mx-auto max-w-6xl space-y-8 px-4 py-8">
+      <main className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:space-y-8 sm:py-8">
         <div>
-          <h1 className="font-display text-3xl font-semibold">
+          <h1 className="font-display text-2xl font-semibold sm:text-3xl">
             {store.settings.businessName}
           </h1>
-          <p className="mt-1 text-base-content/70">
+          <p className="mt-1 text-sm text-base-content/70 sm:text-base">
             Landscaping instant estimates — owner approval first.
           </p>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           <Stat label="Price book items" value={String(store.priceBook.length)} />
           <Stat label="Pending approvals" value={String(pending.length)} />
           <Stat label="Quotes total" value={String(store.quotes.length)} />
@@ -149,11 +149,13 @@ export default async function AdminHomePage() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-base-300 bg-base-100 p-4">
-      <p className="text-xs uppercase tracking-wide text-base-content/55">
+    <div className="rounded-2xl border border-base-300 bg-base-100 p-3 sm:p-4">
+      <p className="text-[0.7rem] uppercase tracking-wide text-base-content/55 sm:text-xs">
         {label}
       </p>
-      <p className="mt-2 font-display text-3xl font-semibold">{value}</p>
+      <p className="mt-2 font-display text-2xl font-semibold sm:text-3xl">
+        {value}
+      </p>
     </div>
   );
 }

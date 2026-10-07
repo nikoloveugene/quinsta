@@ -60,7 +60,7 @@ export function QuoteWidget({
   }
 
   return (
-    <div className="w-full max-w-md rounded-2xl border border-base-300 bg-base-100 p-5 shadow-lg">
+    <div className="mx-auto w-full max-w-md rounded-2xl border border-base-300 bg-base-100 p-4 shadow-lg sm:p-5">
       <div className="mb-4">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
           Instant estimate

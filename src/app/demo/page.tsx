@@ -10,26 +10,28 @@ export default async function DemoPage() {
 
   return (
     <main className="min-h-screen">
-      <div className="border-b border-base-300 bg-base-100/80">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-          <div>
-            <p className="font-display text-xl font-semibold text-primary">
+      <div className="sticky top-0 z-30 border-b border-base-300 bg-base-100/95 backdrop-blur">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
+          <div className="min-w-0">
+            <p className="truncate font-display text-lg font-semibold text-primary sm:text-xl">
               {store.settings.businessName}
             </p>
-            <p className="text-sm text-base-content/60">Demo customer site</p>
+            <p className="text-xs text-base-content/60 sm:text-sm">
+              Demo customer site
+            </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <ThemeToggle />
             <Link href="/admin" className="btn btn-ghost btn-sm">
-              Back to admin
+              Admin
             </Link>
           </div>
         </div>
       </div>
 
-      <section className="mx-auto grid max-w-5xl gap-10 px-4 py-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+      <section className="mx-auto grid max-w-5xl gap-8 px-4 py-8 sm:gap-10 sm:py-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
         <div>
-          <h1 className="font-display text-4xl font-semibold leading-tight sm:text-5xl">
+          <h1 className="font-display text-3xl font-semibold leading-tight sm:text-4xl md:text-5xl">
             Lawn care, mulch, and seasonal cleanup
           </h1>
           <p className="mt-4 max-w-xl text-base-content/75">

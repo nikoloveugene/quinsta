@@ -114,11 +114,13 @@ export default function PriceBookPage() {
   return (
     <div className="min-h-screen">
       <AdminNav current="/admin/price-book" />
-      <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+      <main className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:py-8">
         <div>
-          <h1 className="font-display text-3xl font-semibold">Price book</h1>
-          <p className="mt-1 text-base-content/70">
-            Upload a price list. The rows on the right come from that file.
+          <h1 className="font-display text-2xl font-semibold sm:text-3xl">
+            Price book
+          </h1>
+          <p className="mt-1 text-sm text-base-content/70 sm:text-base">
+            Upload a price list. The mapped rows below come from that file.
           </p>
         </div>
 
@@ -164,8 +166,7 @@ export default function PriceBookPage() {
                         </p>
                         <p className="mt-1 text-sm text-base-content/70">
                           Quinsta mapped {items.length} line
-                          {items.length === 1 ? "" : "s"} — see the panel on the
-                          right.
+                          {items.length === 1 ? "" : "s"} — see the list below.
                         </p>
                       </div>
                       <span className="badge badge-success badge-outline">
@@ -175,7 +176,7 @@ export default function PriceBookPage() {
                     <div className="mt-4 flex flex-wrap gap-2">
                       <button
                         type="button"
-                        className="btn btn-primary btn-sm"
+                        className="btn btn-primary w-full sm:w-auto"
                         disabled={uploading}
                         onClick={() => fileInputRef.current?.click()}
                       >
@@ -184,17 +185,6 @@ export default function PriceBookPage() {
                         ) : (
                           "Replace file"
                         )}
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-ghost btn-sm"
-                        disabled={uploading}
-                        onClick={() => {
-                          setDragOver(false);
-                          fileInputRef.current?.click();
-                        }}
-                      >
-                        Upload another
                       </button>
                     </div>
                   </div>
@@ -268,7 +258,7 @@ export default function PriceBookPage() {
               )}
               <button
                 type="submit"
-                className="btn btn-primary"
+                className="btn btn-primary w-full sm:w-auto"
                 disabled={saving || uploading}
               >
                 {saving ? (
@@ -279,11 +269,34 @@ export default function PriceBookPage() {
               </button>
             </section>
 
-            <section className="rounded-2xl border border-base-300 bg-base-100 p-5">
+            <section className="rounded-2xl border border-base-300 bg-base-100 p-4 sm:p-5">
               <h2 className="font-display text-xl font-semibold">
                 What Quinsta understood ({items.length})
               </h2>
-              <div className="mt-4 max-h-[36rem] overflow-auto">
+              <div className="mt-4 space-y-3 md:hidden">
+                {items.map((item) => (
+                  <div
+                    key={item.sku}
+                    className="rounded-xl border border-base-300 bg-base-200/40 p-3"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-medium">{item.name}</p>
+                        <p className="font-mono text-xs text-base-content/55">
+                          {item.sku} · {item.category}
+                        </p>
+                      </div>
+                      <p className="shrink-0 font-semibold">
+                        {money(item.price)}
+                      </p>
+                    </div>
+                    <p className="mt-1 text-xs text-base-content/55">
+                      per {item.unit}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 hidden max-h-[36rem] overflow-auto md:block">
                 <table className="table table-sm">
                   <thead>
                     <tr>

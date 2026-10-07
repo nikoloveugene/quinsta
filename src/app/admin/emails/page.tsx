@@ -11,10 +11,12 @@ export default async function EmailsPage() {
   return (
     <div className="min-h-screen">
       <AdminNav current="/admin/emails" />
-      <main className="mx-auto max-w-4xl space-y-6 px-4 py-8">
+      <main className="mx-auto max-w-4xl space-y-6 px-4 py-6 sm:py-8">
         <div>
-          <h1 className="font-display text-3xl font-semibold">Email inbox</h1>
-          <p className="mt-1 text-base-content/70">
+          <h1 className="font-display text-2xl font-semibold sm:text-3xl">
+            Email inbox
+          </h1>
+          <p className="mt-1 text-sm text-base-content/70 sm:text-base">
             {hasResend
               ? "RESEND_API_KEY is set. Sent mail is also logged here."
               : "No RESEND_API_KEY. All messages are mock-only and listed here."}
@@ -41,7 +43,7 @@ export default async function EmailsPage() {
                 <p className="mt-1 text-sm text-base-content/60">
                   To {email.to} · {formatDate(email.createdAt)}
                 </p>
-                <pre className="mt-4 whitespace-pre-wrap rounded-xl bg-base-200 p-4 text-sm">
+                <pre className="mt-4 overflow-x-auto whitespace-pre-wrap break-words rounded-xl bg-base-200 p-3 text-xs sm:p-4 sm:text-sm">
                   {email.body}
                 </pre>
               </article>

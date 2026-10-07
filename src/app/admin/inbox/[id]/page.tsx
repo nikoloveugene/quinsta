@@ -80,7 +80,7 @@ export default function QuoteDetailPage() {
   return (
     <div className="min-h-screen">
       <AdminNav current="/admin/inbox" />
-      <main className="mx-auto max-w-4xl space-y-6 px-4 py-8">
+      <main className="mx-auto max-w-4xl space-y-6 px-4 py-6 pb-28 sm:py-8 sm:pb-8">
         <Link href="/admin/inbox" className="link link-primary text-sm">
           ← Back to inbox
         </Link>
@@ -99,9 +99,9 @@ export default function QuoteDetailPage() {
 
         {quote && settings && (
           <>
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <h1 className="font-display text-3xl font-semibold">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h1 className="font-display text-2xl font-semibold sm:text-3xl">
                   Estimate for {quote.customerName}
                 </h1>
                 <p className="mt-1 text-sm text-base-content/65">
@@ -203,23 +203,25 @@ export default function QuoteDetailPage() {
             )}
 
             {quote.status === "pending_approval" && (
-              <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  disabled={acting}
-                  onClick={() => void approve()}
-                >
-                  Approve and email customer
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-outline btn-error"
-                  disabled={acting}
-                  onClick={() => void reject()}
-                >
-                  Reject
-                </button>
+              <div className="fixed inset-x-0 bottom-0 z-30 border-t border-base-300 bg-base-100/95 p-3 backdrop-blur sm:static sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
+                <div className="mx-auto flex max-w-4xl flex-col gap-2 sm:flex-row sm:flex-wrap">
+                  <button
+                    type="button"
+                    className="btn btn-primary w-full sm:w-auto"
+                    disabled={acting}
+                    onClick={() => void approve()}
+                  >
+                    Approve and email customer
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-error w-full sm:w-auto"
+                    disabled={acting}
+                    onClick={() => void reject()}
+                  >
+                    Reject
+                  </button>
+                </div>
               </div>
             )}
           </>
