@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { QuoteWidget } from "@/components/QuoteWidget";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { readStore } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
@@ -17,9 +18,12 @@ export default async function DemoPage() {
             </p>
             <p className="text-sm text-base-content/60">Demo customer site</p>
           </div>
-          <Link href="/admin" className="btn btn-ghost btn-sm">
-            Back to admin
-          </Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Link href="/admin" className="btn btn-ghost btn-sm">
+              Back to admin
+            </Link>
+          </div>
         </div>
       </div>
 

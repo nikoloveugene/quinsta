@@ -19,6 +19,26 @@ const config: Config = {
   daisyui: {
     themes: [
       {
+        "quinsta-dark": {
+          primary: "#5d9a66",
+          "primary-content": "#0c140e",
+          secondary: "#8fa894",
+          "secondary-content": "#0c140e",
+          accent: "#d4923f",
+          "accent-content": "#1a1208",
+          neutral: "#1a221c",
+          "neutral-content": "#dce4dd",
+          "base-100": "#121814",
+          "base-200": "#1a221c",
+          "base-300": "#2a342c",
+          "base-content": "#e6eee7",
+          info: "#6a9db8",
+          success: "#5d9a66",
+          warning: "#d4a017",
+          error: "#d46a5c",
+        },
+      },
+      {
         quinsta: {
           primary: "#2f6b3a",
           "primary-content": "#f4faf5",
