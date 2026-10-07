@@ -23,21 +23,33 @@ export default function PriceBookPage() {
 
   async function load() {
     setLoading(true);
+    setError(null);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
     try {
-      const response = await fetch("/api/price-book");
+      const response = await fetch("/api/price-book", {
+        signal: controller.signal,
+        cache: "no-store",
+      });
       const data = (await response.json()) as {
         raw: string;
         items: PriceItem[];
         settings: BusinessSettings;
       };
+      if (!response.ok) throw new Error("Could not load price book.");
       setRaw(data.raw);
       setItems(data.items);
       setInstructions(data.settings.instructions);
       setBusinessName(data.settings.businessName);
       setOwnerEmail(data.settings.ownerEmail);
-    } catch {
-      setError("Could not load price book.");
+    } catch (err) {
+      setError(
+        err instanceof Error && err.name === "AbortError"
+          ? "Loading timed out. Refresh the page."
+          : "Could not load price book. Refresh the page.",
+      );
     } finally {
+      clearTimeout(timeout);
       setLoading(false);
     }
   }
