@@ -14,18 +14,19 @@ export default async function InboxPage() {
       <main className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:py-8">
         <div>
           <h1 className="font-display text-2xl font-semibold sm:text-3xl">
-            Approval inbox
+            Quotes
           </h1>
           <p className="mt-1 text-sm text-base-content/70 sm:text-base">
-            Review drafts before the customer gets an email.
+            Every estimate already went to the customer. Open one to check the
+            line items and confirm the result looks right.
           </p>
         </div>
 
         {store.quotes.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 p-8 text-center sm:p-10">
-            <p className="text-base-content/70">No quote drafts yet.</p>
+            <p className="text-base-content/70">No quotes yet.</p>
             <Link href="/demo" className="btn btn-primary mt-4 w-full sm:w-auto">
-              Open customer demo
+              Generate a demo quote
             </Link>
           </div>
         ) : (
@@ -99,7 +100,7 @@ export default async function InboxPage() {
                           href={`/admin/inbox/${quote.id}`}
                           className="btn btn-ghost btn-sm"
                         >
-                          Review
+                          Open
                         </Link>
                       </td>
                     </tr>

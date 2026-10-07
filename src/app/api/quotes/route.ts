@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { emailOwnerDraft, emailCustomerEstimate } from "@/lib/email";
+import { emailCustomerEstimate, emailOwnerNotice } from "@/lib/email";
 import { generateQuote } from "@/lib/quote-engine";
 import { readStore, updateStore } from "@/lib/store";
 import type { Quote } from "@/lib/types";
@@ -49,29 +49,26 @@ export async function POST(request: Request) {
     ...draft,
     id: `qt_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
     createdAt: new Date().toISOString(),
-    status:
-      store.settings.approvalMode === "instant"
-        ? "sent"
-        : "pending_approval",
+    status: "sent",
   };
 
   await updateStore((current) => ({
     ...current,
     quotes: [quote, ...current.quotes],
+    settings: {
+      ...current.settings,
+      // Keep product default: instant quotes to the customer
+      approvalMode: "instant",
+    },
   }));
 
-  await emailOwnerDraft(quote, store.settings);
-
-  if (store.settings.approvalMode === "instant") {
-    await emailCustomerEstimate(quote, store.settings);
-  }
+  await emailCustomerEstimate(quote, store.settings);
+  await emailOwnerNotice(quote, store.settings);
 
   return NextResponse.json({
     quote,
     message:
-      store.settings.approvalMode === "instant"
-        ? "Estimate emailed to you and the shop owner."
-        : "Thanks. The shop will review your estimate and email you shortly.",
-    approvalMode: store.settings.approvalMode,
+      "Your estimate is ready and on its way to your email. The shop got a copy too.",
+    approvalMode: "instant",
   });
 }

@@ -15,8 +15,8 @@ export default function HomePage() {
           Instant landscaping estimates for your website
         </h1>
         <p className="mt-5 max-w-2xl text-base text-base-content/75 sm:text-lg">
-          Customers describe the job. Quinsta drafts a price-book estimate.
-          You approve before they get the email.
+          Customers describe the job and get a price-book estimate by email
+          right away. You get a copy so you can check the result.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link href="/admin" className="btn btn-primary w-full sm:w-auto">
@@ -33,8 +33,8 @@ export default function HomePage() {
               body: "Paste your lawn, mulch, and seasonal packages once.",
             },
             {
-              title: "Owner approval",
-              body: "Drafts land in your inbox. Customer email waits on you.",
+              title: "Owner copy",
+              body: "Every customer quote lands in your inbox so you can check it.",
             },
             {
               title: "Script embed",

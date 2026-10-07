@@ -102,7 +102,8 @@ export function QuoteWidget({
           Get a landscaping estimate
         </h2>
         <p className="mt-1 text-sm text-base-content/70">
-          Describe the job. We prepare a non-binding estimate from our price list.
+          Describe the job. You get an estimate from our price list by email
+          right away.
         </p>
       </div>
 
@@ -193,7 +194,8 @@ export function QuoteWidget({
             )}
           </button>
           <p className="text-xs text-base-content/60">
-            Non-binding estimate. Final price may change after a site visit.
+            Estimate based on our price list. Final price may change after a
+            site visit.
           </p>
         </form>
       )}

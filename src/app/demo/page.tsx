@@ -35,8 +35,8 @@ export default async function DemoPage() {
             Lawn care, mulch, and seasonal cleanup
           </h1>
           <p className="mt-4 max-w-xl text-base-content/75">
-            Tell us what you need. You will get a non-binding estimate by email
-            after we review it.
+            Tell us what you need. You get a price-book estimate by email right
+            away. The shop gets a copy at the same time.
           </p>
           <ul className="mt-8 space-y-2 text-sm text-base-content/80">
             <li>• Weekly and biweekly mowing</li>

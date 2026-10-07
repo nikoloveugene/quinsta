@@ -1,6 +1,6 @@
 # Quinsta
 
-AI instant quote widget for landscaping SMBs. Customers describe a job on your site; Quinsta drafts a price-book estimate. By default the owner approves before the customer gets the email.
+AI instant quote widget for landscaping SMBs. Customers describe a job on your site and get a price-book estimate by email right away. The owner gets a copy and can check quotes in admin.
 
 ## First vertical
 
@@ -30,7 +30,7 @@ App: [http://127.0.0.1:4317](http://127.0.0.1:4317)
 | `/` | Product landing |
 | `/admin` | Owner overview |
 | `/admin/price-book` | Paste/edit price list + instructions |
-| `/admin/inbox` | Approve or reject quote drafts |
+| `/admin/inbox` | Quotes sent to customers (quality check) |
 | `/admin/embed` | Script snippet |
 | `/admin/emails` | Mock / logged emails |
 | `/demo` | Customer widget demo |

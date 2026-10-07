@@ -16,7 +16,7 @@ const fraunces = Fraunces({
 export const metadata: Metadata = {
   title: "Quinsta — Landscaping instant estimates",
   description:
-    "AI instant quote widget for landscaping shops. Price-book grounded estimates with owner approval.",
+    "AI instant quote widget for landscaping shops. Price-book grounded estimates emailed to the customer and the owner.",
 };
 
 const themeBootScript = `(() => {

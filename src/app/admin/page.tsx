@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminHomePage() {
   const store = await readStore();
-  const pending = store.quotes.filter((q) => q.status === "pending_approval");
+  const sent = store.quotes.filter((q) => q.status === "sent").length;
   const llm = process.env.OPENAI_API_KEY
     ? "OpenAI"
     : process.env.ANTHROPIC_API_KEY
@@ -24,15 +24,15 @@ export default async function AdminHomePage() {
             {store.settings.businessName}
           </h1>
           <p className="mt-1 text-sm text-base-content/70 sm:text-base">
-            Landscaping instant estimates — owner approval first.
+            Instant landscaping estimates. Check quotes after they go out.
           </p>
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           <Stat label="Price book items" value={String(store.priceBook.length)} />
-          <Stat label="Pending approvals" value={String(pending.length)} />
+          <Stat label="Quotes sent" value={String(sent)} />
           <Stat label="Quotes total" value={String(store.quotes.length)} />
-          <Stat label="Mock emails" value={String(store.emails.length)} />
+          <Stat label="Emails logged" value={String(store.emails.length)} />
         </div>
 
         <div className="grid gap-4 lg:grid-cols-2">
@@ -48,8 +48,8 @@ export default async function AdminHomePage() {
                 <dd>{email}</dd>
               </div>
               <div className="flex justify-between gap-4">
-                <dt className="text-base-content/60">Approval mode</dt>
-                <dd>{store.settings.approvalMode}</dd>
+                <dt className="text-base-content/60">Customer delivery</dt>
+                <dd>Instant</dd>
               </div>
               <div className="flex justify-between gap-4">
                 <dt className="text-base-content/60">Site key</dt>
@@ -76,18 +76,18 @@ export default async function AdminHomePage() {
                 .
               </li>
               <li>
-                Submit a job on the{" "}
+                Generate a quote on the{" "}
                 <Link className="link link-primary" href="/demo">
                   demo page
                 </Link>
                 .
               </li>
               <li>
-                Approve it in the{" "}
+                Open{" "}
                 <Link className="link link-primary" href="/admin/inbox">
-                  inbox
-                </Link>
-                .
+                  Quotes
+                </Link>{" "}
+                and confirm the line items look right.
               </li>
             </ol>
           </section>
@@ -96,7 +96,7 @@ export default async function AdminHomePage() {
         <section className="rounded-2xl border border-base-300 bg-base-100 p-5">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-display text-xl font-semibold">
-              Recent drafts
+              Recent quotes
             </h2>
             <Link href="/admin/inbox" className="btn btn-ghost btn-sm">
               View all

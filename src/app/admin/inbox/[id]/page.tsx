@@ -80,9 +80,9 @@ export default function QuoteDetailPage() {
   return (
     <div className="min-h-screen">
       <AdminNav current="/admin/inbox" />
-      <main className="mx-auto max-w-4xl space-y-6 px-4 py-6 pb-28 sm:py-8 sm:pb-8">
+      <main className="mx-auto max-w-4xl space-y-6 px-4 py-6 sm:py-8">
         <Link href="/admin/inbox" className="link link-primary text-sm">
-          ← Back to inbox
+          ← Back to quotes
         </Link>
 
         {loading && (
@@ -202,26 +202,32 @@ export default function QuoteDetailPage() {
               </div>
             )}
 
+            {quote.status === "sent" && (
+              <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4 text-sm">
+                This estimate was emailed to the customer and to you. Use this
+                page to check whether the line items match what you would have
+                quoted.
+              </div>
+            )}
+
             {quote.status === "pending_approval" && (
-              <div className="fixed inset-x-0 bottom-0 z-30 border-t border-base-300 bg-base-100/95 p-3 backdrop-blur sm:static sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
-                <div className="mx-auto flex max-w-4xl flex-col gap-2 sm:flex-row sm:flex-wrap">
-                  <button
-                    type="button"
-                    className="btn btn-primary w-full sm:w-auto"
-                    disabled={acting}
-                    onClick={() => void approve()}
-                  >
-                    Approve and email customer
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-outline btn-error w-full sm:w-auto"
-                    disabled={acting}
-                    onClick={() => void reject()}
-                  >
-                    Reject
-                  </button>
-                </div>
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                <button
+                  type="button"
+                  className="btn btn-primary w-full sm:w-auto"
+                  disabled={acting}
+                  onClick={() => void approve()}
+                >
+                  Send to customer now
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-outline btn-error w-full sm:w-auto"
+                  disabled={acting}
+                  onClick={() => void reject()}
+                >
+                  Discard
+                </button>
               </div>
             )}
           </>

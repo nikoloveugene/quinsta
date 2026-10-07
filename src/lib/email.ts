@@ -22,7 +22,7 @@ function formatQuoteBody(
 
   const header =
     audience === "owner"
-      ? `New estimate draft for ${quote.customerName}`
+      ? `Quote sent to ${quote.customerName}`
       : `Your estimate from ${settings.businessName}`;
 
   return [
@@ -92,17 +92,23 @@ async function recordEmail(
   return email;
 }
 
-export async function emailOwnerDraft(
+/** Owner copy: quote already went to the customer. */
+export async function emailOwnerNotice(
   quote: Quote,
   settings: BusinessSettings,
 ): Promise<EmailRecord> {
-  const subject = `[Approve] Estimate for ${quote.customerName} — ${money(quote.total)}`;
+  const subject = `Quote sent to ${quote.customerName} — ${money(quote.total)}`;
   const body = [
+    `A landscaping estimate was emailed to ${quote.customerName} <${quote.customerEmail}>.`,
+    quote.customerPhone ? `Phone: ${quote.customerPhone}` : "",
+    "",
+    "Quote copy:",
     formatQuoteBody(quote, settings, "owner"),
     "",
-    `Customer: ${quote.customerName} <${quote.customerEmail}> ${quote.customerPhone}`,
-    "Approve this draft in the Quinsta admin inbox before the customer receives it.",
-  ].join("\n");
+    "Open Quinsta admin → Quotes to check the line items and confirm the result looks right.",
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   const provider = await sendViaResend({
     to: settings.ownerEmail,
@@ -115,10 +121,18 @@ export async function emailOwnerDraft(
     to: settings.ownerEmail,
     subject,
     body,
-    kind: "owner_draft",
+    kind: "owner_notice",
     quoteId: quote.id,
     provider,
   });
+}
+
+/** @deprecated Use emailOwnerNotice — kept for older approve paths */
+export async function emailOwnerDraft(
+  quote: Quote,
+  settings: BusinessSettings,
+): Promise<EmailRecord> {
+  return emailOwnerNotice(quote, settings);
 }
 
 export async function emailCustomerEstimate(
