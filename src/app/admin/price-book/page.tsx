@@ -3,14 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import { AdminNav } from "@/components/AdminNav";
 import type { BusinessSettings, PriceItem } from "@/lib/types";
-import { money } from "@/lib/format";
 
 export default function PriceBookPage() {
-  const [raw, setRaw] = useState("");
   const [instructions, setInstructions] = useState("");
   const [items, setItems] = useState<PriceItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [savingItems, setSavingItems] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
@@ -18,15 +17,16 @@ export default function PriceBookPage() {
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const instructionsRef = useRef(instructions);
-  const rawRef = useRef(raw);
+  const itemsRef = useRef(items);
+  const savedItemsRef = useRef("");
 
   useEffect(() => {
     instructionsRef.current = instructions;
   }, [instructions]);
 
   useEffect(() => {
-    rawRef.current = raw;
-  }, [raw]);
+    itemsRef.current = items;
+  }, [items]);
 
   async function load() {
     setLoading(true);
@@ -39,14 +39,13 @@ export default function PriceBookPage() {
         cache: "no-store",
       });
       const data = (await response.json()) as {
-        raw: string;
         items: PriceItem[];
         source?: string;
         settings: BusinessSettings;
       };
       if (!response.ok) throw new Error("Could not load price book.");
-      setRaw(data.raw);
       setItems(data.items);
+      savedItemsRef.current = JSON.stringify(data.items);
       setLastSource(data.source || null);
       setInstructions(data.settings.instructions);
     } catch (err) {
@@ -65,22 +64,51 @@ export default function PriceBookPage() {
     void load();
   }, []);
 
-  async function persist(partial: { instructions?: string; raw?: string }) {
+  async function persistInstructions() {
     try {
       const response = await fetch("/api/price-book", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(partial),
+        body: JSON.stringify({ instructions: instructionsRef.current }),
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error("Could not update price book.");
-      if (typeof partial.raw === "string") {
-        setItems(data.items);
-        setRaw(data.raw);
-      }
+      if (!response.ok) throw new Error("Could not update instructions.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not update.");
     }
+  }
+
+  async function persistItems(next: PriceItem[]) {
+    const snapshot = JSON.stringify(next);
+    if (snapshot === savedItemsRef.current) return;
+    setSavingItems(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/price-book", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: next }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error("Could not update price book.");
+      savedItemsRef.current = JSON.stringify(data.items);
+      if (JSON.stringify(itemsRef.current) === snapshot) {
+        setItems(data.items);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not update.");
+    } finally {
+      setSavingItems(false);
+    }
+  }
+
+  function updateItem(index: number, patch: Partial<PriceItem>) {
+    setItems((current) =>
+      current.map((item, i) => (i === index ? { ...item, ...patch } : item)),
+    );
+  }
+
+  function saveItemsOnBlur() {
+    void persistItems(itemsRef.current);
   }
 
   async function uploadFile(file: File) {
@@ -100,7 +128,7 @@ export default function PriceBookPage() {
         throw new Error(data.error || "Upload failed.");
       }
       setItems(data.items);
-      setRaw(data.raw);
+      savedItemsRef.current = JSON.stringify(data.items);
       setLastSource(data.source || file.name);
       setWarnings(data.warnings ?? []);
       setMessage(
@@ -123,8 +151,8 @@ export default function PriceBookPage() {
             Price book
           </h1>
           <p className="mt-1 text-sm text-base-content/70 sm:text-base">
-            Upload a price list. Once it is analyzed, that becomes the price
-            book.
+            Upload a price list. Fix any wrong rows in the list — that is the
+            price book.
           </p>
         </div>
 
@@ -133,7 +161,7 @@ export default function PriceBookPage() {
             <span className="loading loading-spinner loading-lg text-primary" />
           </div>
         ) : (
-          <div className="grid gap-10 lg:grid-cols-2 lg:gap-12 lg:items-start">
+          <div className="grid gap-10 lg:grid-cols-2 lg:items-start lg:gap-12">
             <section className="space-y-5">
               <label className="form-control w-full">
                 <span className="label-text mb-1">Owner instructions</span>
@@ -142,9 +170,7 @@ export default function PriceBookPage() {
                   value={instructions}
                   onChange={(e) => setInstructions(e.target.value)}
                   onBlur={() => {
-                    if (instructionsRef.current !== undefined) {
-                      void persist({ instructions: instructionsRef.current });
-                    }
+                    void persistInstructions();
                   }}
                   placeholder="How to price jobs from this list."
                 />
@@ -175,8 +201,8 @@ export default function PriceBookPage() {
                         </p>
                         <p className="mt-1 text-sm text-base-content/70">
                           Quinsta mapped {items.length} line
-                          {items.length === 1 ? "" : "s"} — this is the active
-                          price book.
+                          {items.length === 1 ? "" : "s"} — edit rows on the
+                          right if anything looks off.
                         </p>
                       </div>
                       <span className="badge badge-primary">Applied</span>
@@ -238,20 +264,6 @@ export default function PriceBookPage() {
                 )}
               </div>
 
-              <details className="border-t border-base-300 pt-3">
-                <summary className="cursor-pointer text-sm font-medium">
-                  Edit extracted text (optional)
-                </summary>
-                <textarea
-                  className="textarea textarea-bordered mt-3 min-h-48 w-full font-mono text-xs"
-                  value={raw}
-                  onChange={(e) => setRaw(e.target.value)}
-                  onBlur={() => {
-                    void persist({ raw: rawRef.current });
-                  }}
-                />
-              </details>
-
               {message && (
                 <div className="alert alert-success text-sm">
                   <span>{message}</span>
@@ -270,29 +282,92 @@ export default function PriceBookPage() {
             </section>
 
             <section>
-              <h2 className="font-display text-xl font-semibold">
-                What Quinsta understood ({items.length})
-              </h2>
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <h2 className="font-display text-xl font-semibold">
+                  What Quinsta understood ({items.length})
+                </h2>
+                {savingItems && (
+                  <span className="text-xs text-base-content/55">Saving…</span>
+                )}
+              </div>
+              <p className="mt-1 text-sm text-base-content/65">
+                Tap a field to correct name, SKU, category, unit, or price.
+              </p>
               <div className="mt-4 space-y-3">
-                {items.map((item) => (
+                {items.map((item, index) => (
                   <div
-                    key={item.sku}
+                    key={`${index}-${item.sku}`}
                     className="rounded-xl border border-base-300 p-3"
                   >
                     <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="font-medium">{item.name}</p>
-                        <p className="font-mono text-xs text-base-content/55">
-                          {item.sku} · {item.category}
-                        </p>
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <input
+                          className="input input-ghost input-sm h-auto w-full px-0 text-base font-medium focus:bg-base-200/50"
+                          value={item.name}
+                          aria-label="Service name"
+                          onChange={(e) =>
+                            updateItem(index, { name: e.target.value })
+                          }
+                          onBlur={saveItemsOnBlur}
+                        />
+                        <div className="flex flex-wrap items-center gap-2">
+                          <input
+                            className="input input-ghost input-xs h-auto max-w-[9rem] px-0 font-mono text-xs text-base-content/70 focus:bg-base-200/50"
+                            value={item.sku}
+                            aria-label="SKU"
+                            onChange={(e) =>
+                              updateItem(index, { sku: e.target.value })
+                            }
+                            onBlur={saveItemsOnBlur}
+                          />
+                          <span className="text-xs text-base-content/40">·</span>
+                          <input
+                            className="input input-ghost input-xs h-auto min-w-0 flex-1 px-0 text-xs text-base-content/70 focus:bg-base-200/50"
+                            value={item.category}
+                            aria-label="Category"
+                            onChange={(e) =>
+                              updateItem(index, { category: e.target.value })
+                            }
+                            onBlur={saveItemsOnBlur}
+                          />
+                        </div>
                       </div>
-                      <p className="shrink-0 font-semibold">
-                        {money(item.price)}
-                      </p>
+                      <div className="shrink-0 text-right">
+                        <label className="flex items-center justify-end gap-0.5">
+                          <span className="text-sm font-semibold text-base-content/55">
+                            $
+                          </span>
+                          <input
+                            className="input input-ghost input-sm h-auto w-[5.5rem] px-0 text-right text-base font-semibold focus:bg-base-200/50"
+                            type="number"
+                            inputMode="decimal"
+                            min={0}
+                            step="0.01"
+                            value={Number.isFinite(item.price) ? item.price : 0}
+                            aria-label="Price"
+                            onChange={(e) => {
+                              const price = Number.parseFloat(e.target.value);
+                              updateItem(index, {
+                                price: Number.isFinite(price) ? price : 0,
+                              });
+                            }}
+                            onBlur={saveItemsOnBlur}
+                          />
+                        </label>
+                      </div>
                     </div>
-                    <p className="mt-1 text-xs text-base-content/55">
-                      per {item.unit}
-                    </p>
+                    <label className="mt-2 flex items-center gap-1 text-xs text-base-content/55">
+                      <span>per</span>
+                      <input
+                        className="input input-ghost input-xs h-auto w-28 px-0 text-xs text-base-content/70 focus:bg-base-200/50"
+                        value={item.unit}
+                        aria-label="Unit"
+                        onChange={(e) =>
+                          updateItem(index, { unit: e.target.value })
+                        }
+                        onBlur={saveItemsOnBlur}
+                      />
+                    </label>
                   </div>
                 ))}
               </div>

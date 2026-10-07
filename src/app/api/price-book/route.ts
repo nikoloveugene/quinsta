@@ -6,6 +6,26 @@ import {
   priceBookToCsv,
 } from "@/lib/seed";
 import { SAMPLE_PRICE_BOOK_SOURCE, readStore, updateStore } from "@/lib/store";
+import type { PriceItem } from "@/lib/types";
+
+function normalizeItems(items: unknown): PriceItem[] | null {
+  if (!Array.isArray(items)) return null;
+  return items.map((entry, index) => {
+    const item = (entry ?? {}) as Partial<PriceItem>;
+    const price = Number(item.price);
+    return {
+      sku: String(item.sku ?? "").trim() || `ITEM-${index + 1}`,
+      name: String(item.name ?? "").trim() || `Untitled item ${index + 1}`,
+      category: String(item.category ?? "").trim() || "General",
+      unit: String(item.unit ?? "").trim() || "each",
+      price: Number.isFinite(price) ? price : 0,
+      keywords: Array.isArray(item.keywords)
+        ? item.keywords.map((keyword) => String(keyword))
+        : [],
+      notes: item.notes ? String(item.notes) : undefined,
+    };
+  });
+}
 
 export async function GET() {
   const store = await readStore();
@@ -20,6 +40,7 @@ export async function GET() {
 export async function PUT(request: Request) {
   const body = (await request.json()) as {
     raw?: string;
+    items?: PriceItem[];
     instructions?: string;
     businessName?: string;
     ownerEmail?: string;
@@ -42,21 +63,28 @@ export async function PUT(request: Request) {
       };
     }
 
-    const priceBookRaw =
-      typeof body.raw === "string" ? body.raw : current.priceBookRaw;
-    const priceBook =
-      typeof body.raw === "string"
-        ? parsePriceBookText(body.raw)
-        : current.priceBook;
+    const normalizedItems = normalizeItems(body.items);
+    let priceBook = current.priceBook;
+    let priceBookRaw = current.priceBookRaw;
+    let priceBookSource = current.priceBookSource;
+
+    if (normalizedItems) {
+      priceBook = normalizedItems;
+      priceBookRaw = priceBookToCsv(normalizedItems);
+      priceBookSource =
+        current.priceBookSource || "edited-price-book.csv";
+    } else if (typeof body.raw === "string") {
+      priceBookRaw = body.raw;
+      priceBook = parsePriceBookText(body.raw);
+      priceBookSource =
+        current.priceBookSource || "edited-price-book.csv";
+    }
 
     return {
       ...current,
       priceBook,
       priceBookRaw,
-      priceBookSource:
-        typeof body.raw === "string"
-          ? current.priceBookSource || "edited-price-book.csv"
-          : current.priceBookSource,
+      priceBookSource,
       settings: {
         ...current.settings,
         instructions:
