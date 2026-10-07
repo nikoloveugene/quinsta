@@ -7,6 +7,29 @@ type SubmitResult = {
   quoteTotal?: number;
 };
 
+const EXAMPLE_JOB_DETAILS =
+  "Spring cleanup for front and back yard, 3 yards of mulch in the front beds, shrub trim along the driveway, and fertilize the lawn.";
+
+function PasteIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-4 w-4"
+      aria-hidden="true"
+    >
+      <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+      <rect x="9" y="3" width="6" height="4" rx="1" />
+      <path d="M9 12h6M9 16h4" />
+    </svg>
+  );
+}
+
 export function QuoteWidget({
   siteKey,
   apiBase = "",
@@ -21,6 +44,16 @@ export function QuoteWidget({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<SubmitResult | null>(null);
+
+  async function pasteJobExample() {
+    try {
+      const text = await navigator.clipboard.readText();
+      const next = text.trim() || EXAMPLE_JOB_DETAILS;
+      setJob(next);
+    } catch {
+      setJob(EXAMPLE_JOB_DETAILS);
+    }
+  }
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -119,16 +152,28 @@ export function QuoteWidget({
               autoComplete="tel"
             />
           </label>
-          <label className="form-control w-full">
+          <div className="form-control w-full">
             <span className="label-text mb-1">Job details</span>
-            <textarea
-              className="textarea textarea-bordered min-h-28 w-full"
-              value={job}
-              onChange={(e) => setJob(e.target.value)}
-              required
-              placeholder="Example: Spring cleanup, 3 yards of mulch in front beds, and shrub trim along the driveway."
-            />
-          </label>
+            <div className="relative">
+              <textarea
+                className="textarea textarea-bordered min-h-32 w-full resize-y pb-10"
+                value={job}
+                onChange={(e) => setJob(e.target.value)}
+                required
+                placeholder="Example: Spring cleanup, 3 yards of mulch in front beds, and shrub trim along the driveway."
+              />
+              <button
+                type="button"
+                className="btn btn-ghost btn-xs absolute bottom-2 right-2 gap-1 text-base-content/70"
+                onClick={() => void pasteJobExample()}
+                aria-label="Paste example customer request"
+                title="Paste example request"
+              >
+                <PasteIcon />
+                Paste
+              </button>
+            </div>
+          </div>
 
           {error && (
             <div className="alert alert-error text-sm">
