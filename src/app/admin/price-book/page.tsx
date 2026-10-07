@@ -111,49 +111,15 @@ export default function PriceBookPage() {
     }
   }
 
-  async function resetSample() {
-    setSaving(true);
-    setMessage(null);
-    setError(null);
-    setWarnings([]);
-    try {
-      const response = await fetch("/api/price-book", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ resetSample: true }),
-      });
-      const data = await response.json();
-      setItems(data.items);
-      setRaw(data.raw);
-      setInstructions(data.settings.instructions);
-      setLastSource(data.source || "sample-landscaping-price-book.csv");
-      setMessage("Restored sample landscaping price book.");
-    } catch {
-      setError("Could not reset sample.");
-    } finally {
-      setSaving(false);
-    }
-  }
-
   return (
     <div className="min-h-screen">
       <AdminNav current="/admin/price-book" />
       <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h1 className="font-display text-3xl font-semibold">Price book</h1>
-            <p className="mt-1 text-base-content/70">
-              Upload your price list. Quotes only use these prices.
-            </p>
-          </div>
-          <button
-            type="button"
-            className="btn btn-outline btn-sm"
-            onClick={() => void resetSample()}
-            disabled={saving || uploading}
-          >
-            Restore sample
-          </button>
+        <div>
+          <h1 className="font-display text-3xl font-semibold">Price book</h1>
+          <p className="mt-1 text-base-content/70">
+            Upload a price list. The rows on the right come from that file.
+          </p>
         </div>
 
         {loading ? (
