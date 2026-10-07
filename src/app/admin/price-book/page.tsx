@@ -3,6 +3,23 @@
 import { useEffect, useRef, useState } from "react";
 import { AdminNav } from "@/components/AdminNav";
 import type { BusinessSettings, PriceItem } from "@/lib/types";
+import { money } from "@/lib/format";
+
+function MoreIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className="h-5 w-5"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="5" r="1.75" />
+      <circle cx="12" cy="12" r="1.75" />
+      <circle cx="12" cy="19" r="1.75" />
+    </svg>
+  );
+}
 
 export default function PriceBookPage() {
   const [instructions, setInstructions] = useState("");
@@ -15,6 +32,9 @@ export default function PriceBookPage() {
   const [warnings, setWarnings] = useState<string[]>([]);
   const [lastSource, setLastSource] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [draft, setDraft] = useState<PriceItem | null>(null);
+  const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const instructionsRef = useRef(instructions);
   const itemsRef = useRef(items);
@@ -27,6 +47,17 @@ export default function PriceBookPage() {
   useEffect(() => {
     itemsRef.current = items;
   }, [items]);
+
+  useEffect(() => {
+    function onPointerDown(event: MouseEvent) {
+      const target = event.target as HTMLElement | null;
+      if (!target?.closest("[data-item-menu]")) {
+        setOpenMenuIndex(null);
+      }
+    }
+    document.addEventListener("mousedown", onPointerDown);
+    return () => document.removeEventListener("mousedown", onPointerDown);
+  }, []);
 
   async function load() {
     setLoading(true);
@@ -48,6 +79,8 @@ export default function PriceBookPage() {
       savedItemsRef.current = JSON.stringify(data.items);
       setLastSource(data.source || null);
       setInstructions(data.settings.instructions);
+      setEditingIndex(null);
+      setDraft(null);
     } catch (err) {
       setError(
         err instanceof Error && err.name === "AbortError"
@@ -79,7 +112,7 @@ export default function PriceBookPage() {
 
   async function persistItems(next: PriceItem[]) {
     const snapshot = JSON.stringify(next);
-    if (snapshot === savedItemsRef.current) return;
+    if (snapshot === savedItemsRef.current) return true;
     setSavingItems(true);
     setError(null);
     try {
@@ -91,24 +124,47 @@ export default function PriceBookPage() {
       const data = await response.json();
       if (!response.ok) throw new Error("Could not update price book.");
       savedItemsRef.current = JSON.stringify(data.items);
-      if (JSON.stringify(itemsRef.current) === snapshot) {
-        setItems(data.items);
-      }
+      setItems(data.items);
+      return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not update.");
+      return false;
     } finally {
       setSavingItems(false);
     }
   }
 
-  function updateItem(index: number, patch: Partial<PriceItem>) {
-    setItems((current) =>
-      current.map((item, i) => (i === index ? { ...item, ...patch } : item)),
-    );
+  function startEdit(index: number) {
+    setOpenMenuIndex(null);
+    setEditingIndex(index);
+    setDraft({ ...items[index] });
   }
 
-  function saveItemsOnBlur() {
-    void persistItems(itemsRef.current);
+  function cancelEdit() {
+    setEditingIndex(null);
+    setDraft(null);
+  }
+
+  async function saveEdit() {
+    if (editingIndex === null || !draft) return;
+    const next = items.map((item, i) =>
+      i === editingIndex ? { ...draft } : item,
+    );
+    const ok = await persistItems(next);
+    if (ok) {
+      setEditingIndex(null);
+      setDraft(null);
+    }
+  }
+
+  async function deleteItem(index: number) {
+    setOpenMenuIndex(null);
+    if (editingIndex === index) {
+      setEditingIndex(null);
+      setDraft(null);
+    }
+    const next = items.filter((_, i) => i !== index);
+    await persistItems(next);
   }
 
   async function uploadFile(file: File) {
@@ -131,6 +187,8 @@ export default function PriceBookPage() {
       savedItemsRef.current = JSON.stringify(data.items);
       setLastSource(data.source || file.name);
       setWarnings(data.warnings ?? []);
+      setEditingIndex(null);
+      setDraft(null);
       setMessage(
         `Price book updated from ${data.source || file.name} (${data.items.length} lines).`,
       );
@@ -151,8 +209,8 @@ export default function PriceBookPage() {
             Price book
           </h1>
           <p className="mt-1 text-sm text-base-content/70 sm:text-base">
-            Upload a price list. Fix any wrong rows in the list — that is the
-            price book.
+            Upload a price list. Use the menu on a row to edit or delete if
+            something looks off.
           </p>
         </div>
 
@@ -201,8 +259,8 @@ export default function PriceBookPage() {
                         </p>
                         <p className="mt-1 text-sm text-base-content/70">
                           Quinsta mapped {items.length} line
-                          {items.length === 1 ? "" : "s"} — edit rows on the
-                          right if anything looks off.
+                          {items.length === 1 ? "" : "s"} — this is the active
+                          price book.
                         </p>
                       </div>
                       <span className="badge badge-primary">Applied</span>
@@ -290,86 +348,173 @@ export default function PriceBookPage() {
                   <span className="text-xs text-base-content/55">Saving…</span>
                 )}
               </div>
-              <p className="mt-1 text-sm text-base-content/65">
-                Tap a field to correct name, SKU, category, unit, or price.
-              </p>
               <div className="mt-4 space-y-3">
-                {items.map((item, index) => (
-                  <div
-                    key={`${index}-${item.sku}`}
-                    className="rounded-xl border border-base-300 p-3"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0 flex-1 space-y-2">
-                        <input
-                          className="input input-ghost input-sm h-auto w-full px-0 text-base font-medium focus:bg-base-200/50"
-                          value={item.name}
-                          aria-label="Service name"
-                          onChange={(e) =>
-                            updateItem(index, { name: e.target.value })
-                          }
-                          onBlur={saveItemsOnBlur}
-                        />
-                        <div className="flex flex-wrap items-center gap-2">
-                          <input
-                            className="input input-ghost input-xs h-auto max-w-[9rem] px-0 font-mono text-xs text-base-content/70 focus:bg-base-200/50"
-                            value={item.sku}
-                            aria-label="SKU"
-                            onChange={(e) =>
-                              updateItem(index, { sku: e.target.value })
-                            }
-                            onBlur={saveItemsOnBlur}
-                          />
-                          <span className="text-xs text-base-content/40">·</span>
-                          <input
-                            className="input input-ghost input-xs h-auto min-w-0 flex-1 px-0 text-xs text-base-content/70 focus:bg-base-200/50"
-                            value={item.category}
-                            aria-label="Category"
-                            onChange={(e) =>
-                              updateItem(index, { category: e.target.value })
-                            }
-                            onBlur={saveItemsOnBlur}
-                          />
+                {items.map((item, index) => {
+                  const isEditing = editingIndex === index && draft;
+
+                  if (isEditing) {
+                    return (
+                      <div
+                        key={`${index}-${item.sku}-edit`}
+                        className="rounded-xl border border-primary/40 p-4"
+                      >
+                        <div className="grid gap-3">
+                          <label className="form-control w-full">
+                            <span className="label-text mb-1">Name</span>
+                            <input
+                              className="input input-bordered input-sm"
+                              value={draft.name}
+                              onChange={(e) =>
+                                setDraft({ ...draft, name: e.target.value })
+                              }
+                            />
+                          </label>
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            <label className="form-control w-full">
+                              <span className="label-text mb-1">SKU</span>
+                              <input
+                                className="input input-bordered input-sm font-mono"
+                                value={draft.sku}
+                                onChange={(e) =>
+                                  setDraft({ ...draft, sku: e.target.value })
+                                }
+                              />
+                            </label>
+                            <label className="form-control w-full">
+                              <span className="label-text mb-1">Category</span>
+                              <input
+                                className="input input-bordered input-sm"
+                                value={draft.category}
+                                onChange={(e) =>
+                                  setDraft({
+                                    ...draft,
+                                    category: e.target.value,
+                                  })
+                                }
+                              />
+                            </label>
+                          </div>
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            <label className="form-control w-full">
+                              <span className="label-text mb-1">Price</span>
+                              <input
+                                className="input input-bordered input-sm"
+                                type="number"
+                                inputMode="decimal"
+                                min={0}
+                                step="0.01"
+                                value={
+                                  Number.isFinite(draft.price) ? draft.price : 0
+                                }
+                                onChange={(e) => {
+                                  const price = Number.parseFloat(
+                                    e.target.value,
+                                  );
+                                  setDraft({
+                                    ...draft,
+                                    price: Number.isFinite(price) ? price : 0,
+                                  });
+                                }}
+                              />
+                            </label>
+                            <label className="form-control w-full">
+                              <span className="label-text mb-1">Unit</span>
+                              <input
+                                className="input input-bordered input-sm"
+                                value={draft.unit}
+                                onChange={(e) =>
+                                  setDraft({ ...draft, unit: e.target.value })
+                                }
+                              />
+                            </label>
+                          </div>
+                          <div className="flex flex-wrap gap-2 pt-1">
+                            <button
+                              type="button"
+                              className="btn btn-primary btn-sm"
+                              disabled={savingItems}
+                              onClick={() => void saveEdit()}
+                            >
+                              {savingItems ? (
+                                <span className="loading loading-spinner loading-xs" />
+                              ) : (
+                                "Save"
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-ghost btn-sm"
+                              disabled={savingItems}
+                              onClick={cancelEdit}
+                            >
+                              Cancel
+                            </button>
+                          </div>
                         </div>
                       </div>
-                      <div className="shrink-0 text-right">
-                        <label className="flex items-center justify-end gap-0.5">
-                          <span className="text-sm font-semibold text-base-content/55">
-                            $
-                          </span>
-                          <input
-                            className="input input-ghost input-sm h-auto w-[5.5rem] px-0 text-right text-base font-semibold focus:bg-base-200/50"
-                            type="number"
-                            inputMode="decimal"
-                            min={0}
-                            step="0.01"
-                            value={Number.isFinite(item.price) ? item.price : 0}
-                            aria-label="Price"
-                            onChange={(e) => {
-                              const price = Number.parseFloat(e.target.value);
-                              updateItem(index, {
-                                price: Number.isFinite(price) ? price : 0,
-                              });
-                            }}
-                            onBlur={saveItemsOnBlur}
-                          />
-                        </label>
+                    );
+                  }
+
+                  return (
+                    <div
+                      key={`${index}-${item.sku}`}
+                      className="rounded-xl border border-base-300 p-3"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium">{item.name}</p>
+                          <p className="font-mono text-xs text-base-content/55">
+                            {item.sku} · {item.category}
+                          </p>
+                          <p className="mt-1 text-xs text-base-content/55">
+                            per {item.unit}
+                          </p>
+                        </div>
+                        <div className="flex shrink-0 items-start gap-1">
+                          <p className="pt-0.5 font-semibold">
+                            {money(item.price)}
+                          </p>
+                          <div className="relative" data-item-menu>
+                            <button
+                              type="button"
+                              className="btn btn-ghost btn-square btn-xs"
+                              aria-label={`More options for ${item.name}`}
+                              aria-expanded={openMenuIndex === index}
+                              onClick={() =>
+                                setOpenMenuIndex((current) =>
+                                  current === index ? null : index,
+                                )
+                              }
+                            >
+                              <MoreIcon />
+                            </button>
+                            {openMenuIndex === index && (
+                              <ul className="menu absolute right-0 z-20 mt-1 w-36 rounded-box border border-base-300 bg-base-100 p-1 shadow-lg">
+                                <li>
+                                  <button
+                                    type="button"
+                                    onClick={() => startEdit(index)}
+                                  >
+                                    Edit
+                                  </button>
+                                </li>
+                                <li>
+                                  <button
+                                    type="button"
+                                    className="text-error"
+                                    onClick={() => void deleteItem(index)}
+                                  >
+                                    Delete
+                                  </button>
+                                </li>
+                              </ul>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <label className="mt-2 flex items-center gap-1 text-xs text-base-content/55">
-                      <span>per</span>
-                      <input
-                        className="input input-ghost input-xs h-auto w-28 px-0 text-xs text-base-content/70 focus:bg-base-200/50"
-                        value={item.unit}
-                        aria-label="Unit"
-                        onChange={(e) =>
-                          updateItem(index, { unit: e.target.value })
-                        }
-                        onBlur={saveItemsOnBlur}
-                      />
-                    </label>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
           </div>
