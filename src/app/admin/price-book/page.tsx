@@ -8,8 +8,6 @@ import { money } from "@/lib/format";
 export default function PriceBookPage() {
   const [raw, setRaw] = useState("");
   const [instructions, setInstructions] = useState("");
-  const [businessName, setBusinessName] = useState("");
-  const [ownerEmail, setOwnerEmail] = useState("");
   const [items, setItems] = useState<PriceItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -42,8 +40,6 @@ export default function PriceBookPage() {
       setItems(data.items);
       setLastSource(data.source || null);
       setInstructions(data.settings.instructions);
-      setBusinessName(data.settings.businessName);
-      setOwnerEmail(data.settings.ownerEmail);
     } catch (err) {
       setError(
         err instanceof Error && err.name === "AbortError"
@@ -101,15 +97,13 @@ export default function PriceBookPage() {
         body: JSON.stringify({
           raw,
           instructions,
-          businessName,
-          ownerEmail,
         }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error("Save failed.");
       setItems(data.items);
       setRaw(data.raw);
-      setMessage(`Saved ${data.items.length} price book rows.`);
+      setMessage(`Saved instructions and ${data.items.length} price rows.`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Save failed.");
     } finally {
@@ -132,8 +126,6 @@ export default function PriceBookPage() {
       setItems(data.items);
       setRaw(data.raw);
       setInstructions(data.settings.instructions);
-      setBusinessName(data.settings.businessName);
-      setOwnerEmail(data.settings.ownerEmail);
       setLastSource(data.source || "sample-landscaping-price-book.csv");
       setMessage("Restored sample landscaping price book.");
     } catch {
@@ -172,28 +164,12 @@ export default function PriceBookPage() {
           <form onSubmit={save} className="grid gap-6 lg:grid-cols-2">
             <section className="space-y-4 rounded-2xl border border-base-300 bg-base-100 p-5">
               <label className="form-control w-full">
-                <span className="label-text mb-1">Business name</span>
-                <input
-                  className="input input-bordered"
-                  value={businessName}
-                  onChange={(e) => setBusinessName(e.target.value)}
-                />
-              </label>
-              <label className="form-control w-full">
-                <span className="label-text mb-1">Owner email</span>
-                <input
-                  type="email"
-                  className="input input-bordered"
-                  value={ownerEmail}
-                  onChange={(e) => setOwnerEmail(e.target.value)}
-                />
-              </label>
-              <label className="form-control w-full">
                 <span className="label-text mb-1">Owner instructions</span>
                 <textarea
                   className="textarea textarea-bordered min-h-28"
                   value={instructions}
                   onChange={(e) => setInstructions(e.target.value)}
+                  placeholder="How to price jobs from this list."
                 />
               </label>
 
@@ -332,7 +308,7 @@ export default function PriceBookPage() {
                 {saving ? (
                   <span className="loading loading-spinner loading-sm" />
                 ) : (
-                  "Save business settings"
+                  "Save price book"
                 )}
               </button>
             </section>
