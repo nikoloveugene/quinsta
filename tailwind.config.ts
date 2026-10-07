@@ -20,8 +20,8 @@ const config: Config = {
     themes: [
       {
         "quinsta-dark": {
-          primary: "#5d9a66",
-          "primary-content": "#0c140e",
+          primary: "#3ECF6A",
+          "primary-content": "#07140b",
           secondary: "#8fa894",
           "secondary-content": "#0c140e",
           accent: "#d4923f",
@@ -33,15 +33,15 @@ const config: Config = {
           "base-300": "#2a342c",
           "base-content": "#e6eee7",
           info: "#6a9db8",
-          success: "#5d9a66",
+          success: "#3ECF6A",
           warning: "#d4a017",
           error: "#d46a5c",
         },
       },
       {
         quinsta: {
-          primary: "#2f6b3a",
-          "primary-content": "#f4faf5",
+          primary: "#1B7A38",
+          "primary-content": "#ffffff",
           secondary: "#3d5a40",
           "secondary-content": "#f4faf5",
           accent: "#c4782a",
@@ -53,7 +53,7 @@ const config: Config = {
           "base-300": "#d9d3c6",
           "base-content": "#1c241d",
           info: "#3a6f8c",
-          success: "#2f6b3a",
+          success: "#1B7A38",
           warning: "#b8860b",
           error: "#a33b2c",
         },

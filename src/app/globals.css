@@ -6,7 +6,7 @@
 [data-theme="quinsta"] {
   --page-glow: radial-gradient(
       1200px 600px at 10% -10%,
-      rgba(47, 107, 58, 0.18),
+      rgba(27, 122, 56, 0.18),
       transparent 55%
     ),
     radial-gradient(
@@ -20,7 +20,7 @@
 [data-theme="quinsta-dark"] {
   --page-glow: radial-gradient(
       1000px 520px at 12% -8%,
-      rgba(93, 154, 102, 0.16),
+      rgba(62, 207, 106, 0.18),
       transparent 55%
     ),
     radial-gradient(
@@ -50,17 +50,17 @@ body {
 
 .lawn-grid {
   background-image: linear-gradient(
-      rgba(93, 154, 102, 0.08) 1px,
+      rgba(62, 207, 106, 0.1) 1px,
       transparent 1px
     ),
-    linear-gradient(90deg, rgba(93, 154, 102, 0.08) 1px, transparent 1px);
+    linear-gradient(90deg, rgba(62, 207, 106, 0.1) 1px, transparent 1px);
   background-size: 28px 28px;
 }
 
 [data-theme="quinsta"] .lawn-grid {
   background-image: linear-gradient(
-      rgba(47, 107, 58, 0.05) 1px,
+      rgba(27, 122, 56, 0.06) 1px,
       transparent 1px
     ),
-    linear-gradient(90deg, rgba(47, 107, 58, 0.05) 1px, transparent 1px);
+    linear-gradient(90deg, rgba(27, 122, 56, 0.06) 1px, transparent 1px);
 }
