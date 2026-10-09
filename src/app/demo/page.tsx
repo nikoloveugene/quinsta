@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { PersonaSwitch } from "@/components/PersonaSwitch";
 import { QuoteWidget } from "@/components/QuoteWidget";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { readStore } from "@/lib/store";
@@ -22,9 +22,7 @@ export default async function DemoPage() {
           </div>
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <ThemeToggle />
-            <Link href="/admin" className="btn btn-ghost btn-sm">
-              Admin
-            </Link>
+            <PersonaSwitch current="customer" />
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { PersonaSwitch } from "@/components/PersonaSwitch";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 const links = [
@@ -10,7 +11,6 @@ const links = [
   { href: "/admin/inbox", label: "Quotes" },
   { href: "/admin/embed", label: "Embed" },
   { href: "/admin/emails", label: "Emails" },
-  { href: "/demo", label: "Demo" },
 ];
 
 export function AdminNav({ current }: { current?: string }) {
@@ -31,8 +31,9 @@ export function AdminNav({ current }: { current?: string }) {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
           <ThemeToggle />
+          <PersonaSwitch current="admin" />
           <button
             type="button"
             className="btn btn-ghost btn-sm md:hidden"
