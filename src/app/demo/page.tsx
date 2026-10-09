@@ -32,16 +32,17 @@ export default async function DemoPage() {
       <section className="mx-auto grid max-w-5xl gap-8 px-4 py-8 sm:gap-10 sm:py-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
         <div>
           <h1 className="font-display text-3xl font-semibold leading-tight sm:text-4xl md:text-5xl">
-            Lawn care, mulch, and seasonal cleanup
+            Request a job estimate
           </h1>
           <p className="mt-4 max-w-xl text-base-content/75">
-            Tell us what you need. You get a price-book estimate by email right
-            away. The shop gets a copy at the same time.
+            This demo uses a sample landscaping shop price book. Tell us what
+            you need. You get an estimate by email right away. The shop gets a
+            copy at the same time.
           </p>
           <ul className="mt-8 space-y-2 text-sm text-base-content/80">
-            <li>• Weekly and biweekly mowing</li>
-            <li>• Spring and fall cleanup packages</li>
-            <li>• Mulch, edging, fertilizer, shrub trim</li>
+            <li>• Sample packages: weekly and biweekly mowing</li>
+            <li>• Sample packages: spring and fall cleanup</li>
+            <li>• Sample add-ons: mulch, edging, fertilizer, shrub trim</li>
           </ul>
         </div>
         <QuoteWidget siteKey={store.settings.siteKey} />

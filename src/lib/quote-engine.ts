@@ -218,7 +218,7 @@ async function generateWithOpenAI(
         {
           role: "system",
           content:
-            "You create landscaping estimates. Only use SKUs from the provided price book. Return JSON with lineItems[{sku,name,quantity,unit,unitPrice,lineTotal}], assumptions[], exclusions[], subtotal, total. Do not invent prices.",
+            "You create service estimates from a shop price book. Only use SKUs from the provided price book. Return JSON with lineItems[{sku,name,quantity,unit,unitPrice,lineTotal}], assumptions[], exclusions[], subtotal, total. Do not invent prices.",
         },
         {
           role: "user",
@@ -285,7 +285,7 @@ async function generateWithAnthropic(
       messages: [
         {
           role: "user",
-          content: `Create a landscaping estimate JSON only. Use only these SKUs. Instructions: ${instructions}\nPrice book: ${JSON.stringify(catalog)}\nJob: ${JSON.stringify(input)}\nReturn JSON with lineItems, assumptions, exclusions, subtotal, total.`,
+          content: `Create a service estimate JSON only. Use only these SKUs. Instructions: ${instructions}\nPrice book: ${JSON.stringify(catalog)}\nJob: ${JSON.stringify(input)}\nReturn JSON with lineItems, assumptions, exclusions, subtotal, total.`,
         },
       ],
     }),

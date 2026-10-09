@@ -24,7 +24,8 @@ export default async function AdminHomePage() {
             {store.settings.businessName}
           </h1>
           <p className="mt-1 text-sm text-base-content/70 sm:text-base">
-            Instant landscaping estimates. Check quotes after they go out.
+            Instant estimates from your price book. Check quotes after they go
+            out.
           </p>
         </div>
 

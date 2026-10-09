@@ -99,7 +99,7 @@ export function QuoteWidget({
           Instant estimate
         </p>
         <h2 className="font-display text-2xl font-semibold text-base-content">
-          Get a landscaping estimate
+          Get an estimate
         </h2>
         <p className="mt-1 text-sm text-base-content/70">
           Describe the job. You get an estimate from our price list by email

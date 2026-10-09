@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export default async function EmbedPage() {
   const store = await readStore();
-  const snippet = `<!-- Quinsta landscaping estimate widget -->
+  const snippet = `<!-- Quinsta instant estimate widget -->
 <script
   src="${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:4317"}/widget.js"
   data-site-key="${store.settings.siteKey}"

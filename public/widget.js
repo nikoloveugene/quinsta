@@ -6,7 +6,7 @@
 
   var button = document.createElement("button");
   button.type = "button";
-  button.textContent = "Get landscaping estimate";
+  button.textContent = "Get estimate";
   button.setAttribute(
     "style",
     [

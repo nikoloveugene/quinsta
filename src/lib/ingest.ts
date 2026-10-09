@@ -128,7 +128,7 @@ async function visionExtract(
           content: [
             {
               type: "text",
-              text: "Extract landscaping price list lines from this photo (printed or handwritten). Return plain CSV with header sku,name,category,unit,price,keywords,notes. Invent simple SKUs if missing. Only include items with a price. No markdown.",
+              text: "Extract price list lines from this photo (printed or handwritten). Return plain CSV with header sku,name,category,unit,price,keywords,notes. Invent simple SKUs if missing. Only include items with a price. No markdown.",
             },
             { type: "image_url", image_url: { url: dataUrl } },
           ],

@@ -99,7 +99,7 @@ export async function emailOwnerNotice(
 ): Promise<EmailRecord> {
   const subject = `Quote sent to ${quote.customerName} — ${money(quote.total)}`;
   const body = [
-    `A landscaping estimate was emailed to ${quote.customerName} <${quote.customerEmail}>.`,
+    `An estimate was emailed to ${quote.customerName} <${quote.customerEmail}>.`,
     quote.customerPhone ? `Phone: ${quote.customerPhone}` : "",
     "",
     "Quote copy:",
@@ -139,7 +139,7 @@ export async function emailCustomerEstimate(
   quote: Quote,
   settings: BusinessSettings,
 ): Promise<EmailRecord> {
-  const subject = `Your landscaping estimate from ${settings.businessName}`;
+  const subject = `Your estimate from ${settings.businessName}`;
   const body = formatQuoteBody(quote, settings, "customer");
 
   const provider = await sendViaResend({

@@ -27,7 +27,7 @@ export function AdminNav({ current }: { current?: string }) {
             Quinsta
           </Link>
           <p className="truncate text-xs text-base-content/70 sm:text-sm">
-            Landscaping quote admin
+            Quote admin
           </p>
         </div>
 

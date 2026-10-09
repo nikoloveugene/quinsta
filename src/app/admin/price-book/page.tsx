@@ -209,7 +209,7 @@ export default function PriceBookPage() {
             Price book
           </h1>
           <p className="mt-1 text-sm text-base-content/70 sm:text-base">
-            Upload a price list. Use the menu on a row to edit or delete if
+            Upload your rate list. Use the menu on a row to edit or delete if
             something looks off.
           </p>
         </div>
@@ -220,19 +220,38 @@ export default function PriceBookPage() {
           </div>
         ) : (
           <div className="grid gap-10 lg:grid-cols-2 lg:items-start lg:gap-12">
-            <section className="space-y-5">
-              <label className="form-control w-full">
-                <span className="label-text mb-1">Owner instructions</span>
-                <textarea
-                  className="textarea textarea-bordered min-h-28"
-                  value={instructions}
-                  onChange={(e) => setInstructions(e.target.value)}
-                  onBlur={() => {
-                    void persistInstructions();
-                  }}
-                  placeholder="How to price jobs from this list."
-                />
-              </label>
+            <section className="space-y-8">
+              <div className="space-y-3 border-b border-primary/25 pb-8">
+                <h2 className="font-display text-xl font-semibold">
+                  Owner instructions
+                </h2>
+                <div className="space-y-2 text-sm text-base-content/75">
+                  <p>
+                    A price list alone is not enough when the real price depends
+                    on a site visit, hidden damage, a custom layout, or labor
+                    that changes job to job.
+                  </p>
+                  <p>
+                    Write how you expect Quinsta to build quotes: what to
+                    include, what to leave out, when to refuse a firm number,
+                    trip fees, minimums, and the tone you want.
+                  </p>
+                </div>
+                <label className="form-control w-full">
+                  <span className="label-text mb-1 sr-only">
+                    Owner instructions
+                  </span>
+                  <textarea
+                    className="textarea textarea-bordered min-h-36 text-sm"
+                    value={instructions}
+                    onChange={(e) => setInstructions(e.target.value)}
+                    onBlur={() => {
+                      void persistInstructions();
+                    }}
+                    placeholder="Example: Do not invent prices. If size is unclear, assume a typical job and say so. Never discount labor. Add a trip fee outside the service area. Refuse a firm number for custom work that needs a site visit."
+                  />
+                </label>
+              </div>
 
               <div>
                 <p className="label-text mb-2">Price list file</p>

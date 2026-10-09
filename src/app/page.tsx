@@ -12,11 +12,11 @@ export default function HomePage() {
           Quinsta
         </p>
         <h1 className="max-w-3xl font-display text-4xl font-semibold leading-tight text-base-content sm:text-5xl md:text-6xl">
-          Instant landscaping estimates for your website
+          Instant estimates for your website
         </h1>
         <p className="mt-5 max-w-2xl text-base text-base-content/75 sm:text-lg">
-          Customers describe the job and get a price-book estimate by email
-          right away. You get a copy so you can check the result.
+          Upload your price book. Customers describe the job and get an estimate
+          by email right away. You get a copy so you can check the result.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link href="/admin" className="btn btn-primary w-full sm:w-auto">
@@ -30,7 +30,7 @@ export default function HomePage() {
           {[
             {
               title: "Price book",
-              body: "Paste your lawn, mulch, and seasonal packages once.",
+              body: "Upload your rate list once. Quinsta maps it into quote lines.",
             },
             {
               title: "Owner copy",
@@ -38,7 +38,7 @@ export default function HomePage() {
             },
             {
               title: "Script embed",
-              body: "One snippet on your site. No CRM or Jobber required.",
+              body: "One snippet on your site. No CRM required.",
             },
           ].map((item) => (
             <div key={item.title} className="border-t border-primary/30 pt-4">
