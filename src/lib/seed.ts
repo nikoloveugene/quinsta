@@ -8,7 +8,7 @@ export const DEFAULT_SETTINGS: BusinessSettings = {
     "This is a non-binding estimate. Final price may change after a site visit.",
   instructions:
     "Prefer package SKUs when the job matches weekly or seasonal work. Add mulch and cleanup as line items when mentioned. Do not invent prices. If lawn size is unclear, assume a typical suburban lot (about 5,000 sq ft) and note that assumption. Never discount labor. Exclude tree removal and hardscape unless listed in the price book.",
-  siteKey: "qs_demo_landscaping",
+  siteKey: "qs_demo_quinsta",
   approvalMode: "instant",
 };
 

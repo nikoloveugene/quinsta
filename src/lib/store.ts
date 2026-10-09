@@ -46,10 +46,15 @@ async function ensureStore(): Promise<StoreShape> {
     const raw = await fs.readFile(storePath(), "utf8");
     const parsed = JSON.parse(raw) as StoreShape;
     const defaults = defaultStore();
+    const mergedSettings = { ...DEFAULT_SETTINGS, ...parsed.settings };
+    // Migrate legacy demo site key so embed snippet and widget keep working.
+    if (mergedSettings.siteKey === "qs_demo_landscaping") {
+      mergedSettings.siteKey = DEFAULT_SETTINGS.siteKey;
+    }
     const store: StoreShape = {
       ...defaults,
       ...parsed,
-      settings: { ...DEFAULT_SETTINGS, ...parsed.settings },
+      settings: mergedSettings,
       priceBookSource:
         parsed.priceBookSource ||
         (parsed.priceBook?.length
@@ -57,6 +62,9 @@ async function ensureStore(): Promise<StoreShape> {
           : defaults.priceBookSource),
     };
     globalForStore.__quinstaStore = store;
+    if (parsed.settings?.siteKey === "qs_demo_landscaping") {
+      void writeStore(store);
+    }
     return store;
   } catch {
     const store = defaultStore();

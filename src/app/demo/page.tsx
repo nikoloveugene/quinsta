@@ -35,9 +35,9 @@ export default async function DemoPage() {
             Request a job estimate
           </h1>
           <p className="mt-4 max-w-xl text-base-content/75">
-            This demo uses a sample landscaping shop price book. Tell us what
-            you need. You get an estimate by email right away. The shop gets a
-            copy at the same time.
+            This demo uses a sample shop price book (lawn care packages). Tell
+            us what you need. You get an estimate by email right away. The shop
+            gets a copy at the same time.
           </p>
           <ul className="mt-8 space-y-2 text-sm text-base-content/80">
             <li>• Sample packages: weekly and biweekly mowing</li>

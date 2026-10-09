@@ -35,7 +35,12 @@ export async function POST(request: Request) {
 
   const store = await readStore();
 
-  if (body.siteKey && body.siteKey !== store.settings.siteKey) {
+  const allowedSiteKeys = new Set([
+    store.settings.siteKey,
+    "qs_demo_quinsta",
+    "qs_demo_landscaping", // legacy embed snippets
+  ]);
+  if (body.siteKey && !allowedSiteKeys.has(body.siteKey)) {
     return NextResponse.json({ error: "Invalid site key." }, { status: 403 });
   }
 
