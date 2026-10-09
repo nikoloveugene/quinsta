@@ -25,6 +25,9 @@ export type EmailThread = {
   emailIds: string[];
   customer: EmailPane | null;
   owner: EmailPane | null;
+  /** Quote used to render the estimate layout in both tabs. */
+  quote: Quote | null;
+  settings: BusinessSettings;
 };
 
 function isCustomerKind(kind: EmailRecord["kind"]): boolean {
@@ -70,7 +73,7 @@ export function groupEmailThreads(
     const customerRow = sorted.find((e) => isCustomerKind(e.kind));
     const ownerRow = sorted.find((e) => isOwnerKind(e.kind));
     const quoteId = sorted.find((e) => e.quoteId)?.quoteId;
-    const quote = quoteId ? quoteById.get(quoteId) : undefined;
+    const quote = quoteId ? (quoteById.get(quoteId) ?? null) : null;
 
     let customer: EmailPane | null = customerRow
       ? paneFromRecord(customerRow)
@@ -95,7 +98,6 @@ export function groupEmailThreads(
       };
     }
 
-    // Orphan single emails without a quote still show in both tabs when possible.
     if (!customer && !owner && sorted[0]) {
       const fallback = paneFromRecord(sorted[0]);
       if (isOwnerKind(sorted[0].kind)) {
@@ -112,6 +114,8 @@ export function groupEmailThreads(
       emailIds: sorted.map((e) => e.id),
       customer,
       owner,
+      quote,
+      settings,
     });
   }
 
@@ -122,9 +126,7 @@ export function groupEmailThreads(
 }
 
 /** Persist missing customer/owner rows when a quote exists but one side was lost. */
-export function emailsNeedingBackfill(
-  store: StoreShape,
-): EmailRecord[] {
+export function emailsNeedingBackfill(store: StoreShape): EmailRecord[] {
   const quoteById = new Map(store.quotes.map((q) => [q.id, q]));
   const byQuote = new Map<string, EmailRecord[]>();
 

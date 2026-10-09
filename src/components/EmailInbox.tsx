@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { QuoteDocument } from "@/components/QuoteDocument";
 import type { EmailPane, EmailThread } from "@/lib/email-threads";
 import { formatDate } from "@/lib/format";
 
@@ -20,9 +21,9 @@ function MoreIcon() {
   );
 }
 
-function PaneBody({ pane }: { pane: EmailPane }) {
+function PlainFallback({ pane }: { pane: EmailPane }) {
   return (
-    <div className="space-y-3 pt-4">
+    <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-medium">{pane.subject}</h2>
         <span className="badge badge-ghost badge-sm">{pane.provider}</span>
@@ -58,10 +59,14 @@ function EmailThreadCard({
     return () => document.removeEventListener("mousedown", onPointerDown);
   }, []);
 
-  const shown =
+  const pane =
     tab === "customer"
       ? (thread.customer ?? thread.owner)
       : (thread.owner ?? thread.customer);
+
+  const ownerPreface = thread.quote
+    ? `An estimate was emailed to ${thread.quote.customerName} <${thread.quote.customerEmail}>.`
+    : undefined;
 
   async function handleDelete() {
     setDeleting(true);
@@ -139,15 +144,28 @@ function EmailThreadCard({
         </div>
       </div>
 
-      <p className="mt-2 text-sm text-base-content/55">
-        {formatDate(thread.createdAt)}
-      </p>
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-sm text-base-content/55">
+        <span>{formatDate(thread.createdAt)}</span>
+        {pane ? (
+          <span className="badge badge-ghost badge-sm">
+            {pane.provider} · To {pane.to}
+          </span>
+        ) : null}
+      </div>
 
-      {shown ? (
-        <PaneBody pane={shown} />
-      ) : (
-        <p className="pt-4 text-sm text-base-content/60">No email body.</p>
-      )}
+      <div className="mt-4">
+        {thread.quote ? (
+          <QuoteDocument
+            quote={thread.quote}
+            settings={thread.settings}
+            preface={tab === "owner" ? ownerPreface : undefined}
+          />
+        ) : pane ? (
+          <PlainFallback pane={pane} />
+        ) : (
+          <p className="text-sm text-base-content/60">No email body.</p>
+        )}
+      </div>
 
       {error && (
         <div className="alert alert-error mt-4 text-sm">
