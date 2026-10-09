@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { emailCustomerEstimate, emailOwnerNotice } from "@/lib/email";
+import { sendQuoteEmails } from "@/lib/email";
 import { generateQuote } from "@/lib/quote-engine";
 import { readStore, updateStore } from "@/lib/store";
 import type { Quote } from "@/lib/types";
@@ -67,8 +67,8 @@ export async function POST(request: Request) {
     },
   }));
 
-  await emailCustomerEstimate(quote, store.settings);
-  await emailOwnerNotice(quote, store.settings);
+  // One store write for both customer + owner copies (avoids losing one side).
+  await sendQuoteEmails(quote, store.settings);
 
   return NextResponse.json({
     quote,
