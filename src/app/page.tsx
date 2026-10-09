@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PersonaAvatar } from "@/components/PersonaAvatar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function HomePage() {
@@ -19,11 +20,19 @@ export default function HomePage() {
           by email right away. You get a copy so you can check the result.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <Link href="/admin" className="btn btn-primary w-full sm:w-auto">
-            Open admin
+          <Link
+            href="/admin"
+            className="btn btn-primary w-full gap-2 sm:w-auto"
+          >
+            <PersonaAvatar persona="admin" active size="md" />
+            Admin view
           </Link>
-          <Link href="/demo" className="btn btn-outline w-full sm:w-auto">
-            Try customer widget
+          <Link
+            href="/demo"
+            className="btn btn-outline w-full gap-2 sm:w-auto"
+          >
+            <PersonaAvatar persona="customer" size="md" />
+            Customer widget
           </Link>
         </div>
         <div className="mt-14 grid gap-6 sm:grid-cols-3">

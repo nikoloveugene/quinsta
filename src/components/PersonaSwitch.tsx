@@ -1,31 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
+import { PersonaAvatar, type PersonaKind } from "@/components/PersonaAvatar";
 
-type Persona = "admin" | "customer";
-
-function PersonaAvatar({
-  src,
-  alt,
-  active,
-}: {
-  src: string;
-  alt: string;
-  active: boolean;
-}) {
-  return (
-    <div className={`avatar ${active ? "online" : "offline"}`}>
-      <div
-        className={`w-6 rounded-full ring ring-offset-base-100 ring-offset-1 sm:w-7 ${
-          active ? "ring-primary" : "ring-base-300"
-        }`}
-      >
-        <Image src={src} alt={alt} width={28} height={28} />
-      </div>
-    </div>
-  );
-}
-
-export function PersonaSwitch({ current }: { current: Persona }) {
+export function PersonaSwitch({ current }: { current: PersonaKind }) {
   return (
     <div className="join" role="group" aria-label="View">
       <Link
@@ -35,11 +11,7 @@ export function PersonaSwitch({ current }: { current: Persona }) {
         }`}
         aria-current={current === "admin" ? "page" : undefined}
       >
-        <PersonaAvatar
-          src="/avatars/admin.jpg"
-          alt="Admin persona"
-          active={current === "admin"}
-        />
+        <PersonaAvatar persona="admin" active={current === "admin"} />
         Admin view
       </Link>
       <Link
@@ -49,11 +21,7 @@ export function PersonaSwitch({ current }: { current: Persona }) {
         }`}
         aria-current={current === "customer" ? "page" : undefined}
       >
-        <PersonaAvatar
-          src="/avatars/customer.jpg"
-          alt="Customer persona"
-          active={current === "customer"}
-        />
+        <PersonaAvatar persona="customer" active={current === "customer"} />
         Customer view
       </Link>
     </div>
