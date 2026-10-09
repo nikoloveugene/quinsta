@@ -21,8 +21,8 @@ export default async function DemoPage() {
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-            <ThemeToggle />
             <PersonaSwitch current="customer" />
+            <ThemeToggle />
           </div>
         </div>
       </div>
