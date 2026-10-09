@@ -8,7 +8,7 @@ The seeded demo uses a **sample landscaping price book** (mow, mulch, cleanup) s
 
 - Next.js (App Router) + TypeScript
 - Tailwind CSS + **daisyUI**
-- Local JSON store (no database required)
+- Durable JSON store via **Vercel Blob** in production (local `data/store.json` for offline/dev)
 - Email: Resend when `RESEND_API_KEY` is set, otherwise mock inbox at `/admin/emails`
 - Quotes: OpenAI or Anthropic when a key is set, otherwise a deterministic mock grounded on the price book
 
@@ -40,6 +40,8 @@ RESEND_API_KEY=       # real email; omit for mock inbox
 OPENAI_API_KEY=       # LLM quotes; omit for mock engine
 ANTHROPIC_API_KEY=    # alternative LLM
 NEXT_PUBLIC_APP_URL=http://127.0.0.1:4317
+# On Vercel, connect a private Blob store (BLOB_READ_WRITE_TOKEN / BLOB_STORE_ID)
+# so quotes and emails persist across serverless invocations.
 ```
 
 ## Out of scope (this slice)

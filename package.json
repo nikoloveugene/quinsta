@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@vercel/blob": "^2.8.1",
     "daisyui": "^4.12.24",
     "next": "^16.4.0",
     "pdf-parse": "^2.4.5",
