@@ -21,25 +21,6 @@ function MoreIcon() {
   );
 }
 
-function EditIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="h-4 w-4"
-      aria-hidden="true"
-    >
-      <path d="M12 20h9" />
-      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
-    </svg>
-  );
-}
-
 export default function PriceBookPage() {
   const [instructions, setInstructions] = useState("");
   const [items, setItems] = useState<PriceItem[]>([]);
@@ -273,54 +254,56 @@ export default function PriceBookPage() {
                   </p>
                 </div>
                 {editingInstructions ? (
-                  <div className="space-y-3">
-                    <textarea
-                      className="textarea textarea-bordered min-h-36 w-full text-sm"
-                      value={instructionsDraft}
-                      onChange={(e) => setInstructionsDraft(e.target.value)}
-                      placeholder="Example: Do not invent prices. If size is unclear, assume a typical job and say so. Never discount labor. Add a trip fee outside the service area. Refuse a firm number for custom work that needs a site visit."
-                      autoFocus
-                    />
-                    <div className="flex flex-wrap gap-2">
+                  <textarea
+                    className="textarea textarea-bordered min-h-36 w-full text-sm"
+                    value={instructionsDraft}
+                    onChange={(e) => setInstructionsDraft(e.target.value)}
+                    placeholder="Example: Do not invent prices. If size is unclear, assume a typical job and say so. Never discount labor. Add a trip fee outside the service area. Refuse a firm number for custom work that needs a site visit."
+                    autoFocus
+                  />
+                ) : (
+                  <div className="min-h-36 rounded-lg border border-base-300 px-3 py-3">
+                    <p className="whitespace-pre-wrap text-sm text-base-content/90">
+                      {instructions.trim()
+                        ? instructions
+                        : "No instructions yet. Click Edit to add how Quinsta should build quotes."}
+                    </p>
+                  </div>
+                )}
+                <div className="flex flex-wrap gap-2">
+                  {editingInstructions ? (
+                    <>
                       <button
                         type="button"
-                        className="btn btn-primary btn-sm"
+                        className="btn btn-primary"
                         disabled={savingInstructions}
                         onClick={() => void submitInstructions()}
                       >
                         {savingInstructions ? (
-                          <span className="loading loading-spinner loading-xs" />
+                          <span className="loading loading-spinner loading-sm" />
                         ) : (
                           "Submit"
                         )}
                       </button>
                       <button
                         type="button"
-                        className="btn btn-ghost btn-sm"
+                        className="btn btn-ghost"
                         disabled={savingInstructions}
                         onClick={cancelEditInstructions}
                       >
                         Cancel
                       </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="relative min-h-36 rounded-lg border border-base-300 bg-base-200/30 px-3 py-3 pr-12">
+                    </>
+                  ) : (
                     <button
                       type="button"
-                      className="btn btn-ghost btn-square btn-xs absolute right-2 top-2"
-                      aria-label="Edit owner instructions"
+                      className="btn btn-primary"
                       onClick={startEditInstructions}
                     >
-                      <EditIcon />
+                      Edit
                     </button>
-                    <p className="whitespace-pre-wrap text-sm text-base-content/90">
-                      {instructions.trim()
-                        ? instructions
-                        : "No instructions yet. Click edit to add how Quinsta should build quotes."}
-                    </p>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
 
               <div>
