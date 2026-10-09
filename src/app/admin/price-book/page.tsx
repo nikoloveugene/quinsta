@@ -21,6 +21,25 @@ function MoreIcon() {
   );
 }
 
+function EditIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-4 w-4"
+      aria-hidden="true"
+    >
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  );
+}
+
 export default function PriceBookPage() {
   const [instructions, setInstructions] = useState("");
   const [items, setItems] = useState<PriceItem[]>([]);
@@ -35,14 +54,12 @@ export default function PriceBookPage() {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [draft, setDraft] = useState<PriceItem | null>(null);
   const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
+  const [editingInstructions, setEditingInstructions] = useState(false);
+  const [instructionsDraft, setInstructionsDraft] = useState("");
+  const [savingInstructions, setSavingInstructions] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const instructionsRef = useRef(instructions);
   const itemsRef = useRef(items);
   const savedItemsRef = useRef("");
-
-  useEffect(() => {
-    instructionsRef.current = instructions;
-  }, [instructions]);
 
   useEffect(() => {
     itemsRef.current = items;
@@ -79,6 +96,8 @@ export default function PriceBookPage() {
       savedItemsRef.current = JSON.stringify(data.items);
       setLastSource(data.source || null);
       setInstructions(data.settings.instructions);
+      setInstructionsDraft(data.settings.instructions);
+      setEditingInstructions(false);
       setEditingIndex(null);
       setDraft(null);
     } catch (err) {
@@ -97,16 +116,32 @@ export default function PriceBookPage() {
     void load();
   }, []);
 
-  async function persistInstructions() {
+  function startEditInstructions() {
+    setInstructionsDraft(instructions);
+    setEditingInstructions(true);
+  }
+
+  function cancelEditInstructions() {
+    setInstructionsDraft(instructions);
+    setEditingInstructions(false);
+  }
+
+  async function submitInstructions() {
+    setSavingInstructions(true);
+    setError(null);
     try {
       const response = await fetch("/api/price-book", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ instructions: instructionsRef.current }),
+        body: JSON.stringify({ instructions: instructionsDraft }),
       });
       if (!response.ok) throw new Error("Could not update instructions.");
+      setInstructions(instructionsDraft);
+      setEditingInstructions(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not update.");
+    } finally {
+      setSavingInstructions(false);
     }
   }
 
@@ -237,20 +272,55 @@ export default function PriceBookPage() {
                     trip fees, minimums, and the tone you want.
                   </p>
                 </div>
-                <label className="form-control w-full">
-                  <span className="label-text mb-1 sr-only">
-                    Owner instructions
-                  </span>
-                  <textarea
-                    className="textarea textarea-bordered min-h-36 text-sm"
-                    value={instructions}
-                    onChange={(e) => setInstructions(e.target.value)}
-                    onBlur={() => {
-                      void persistInstructions();
-                    }}
-                    placeholder="Example: Do not invent prices. If size is unclear, assume a typical job and say so. Never discount labor. Add a trip fee outside the service area. Refuse a firm number for custom work that needs a site visit."
-                  />
-                </label>
+                {editingInstructions ? (
+                  <div className="space-y-3">
+                    <textarea
+                      className="textarea textarea-bordered min-h-36 w-full text-sm"
+                      value={instructionsDraft}
+                      onChange={(e) => setInstructionsDraft(e.target.value)}
+                      placeholder="Example: Do not invent prices. If size is unclear, assume a typical job and say so. Never discount labor. Add a trip fee outside the service area. Refuse a firm number for custom work that needs a site visit."
+                      autoFocus
+                    />
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        disabled={savingInstructions}
+                        onClick={() => void submitInstructions()}
+                      >
+                        {savingInstructions ? (
+                          <span className="loading loading-spinner loading-xs" />
+                        ) : (
+                          "Submit"
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        disabled={savingInstructions}
+                        onClick={cancelEditInstructions}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="relative min-h-36 rounded-lg border border-base-300 bg-base-200/30 px-3 py-3 pr-12">
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-square btn-xs absolute right-2 top-2"
+                      aria-label="Edit owner instructions"
+                      onClick={startEditInstructions}
+                    >
+                      <EditIcon />
+                    </button>
+                    <p className="whitespace-pre-wrap text-sm text-base-content/90">
+                      {instructions.trim()
+                        ? instructions
+                        : "No instructions yet. Click edit to add how Quinsta should build quotes."}
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div>
